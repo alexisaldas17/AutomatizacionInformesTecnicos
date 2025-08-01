@@ -1,0 +1,94 @@
+import React from 'react';
+/* import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+ */import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+import Home from './components/home/Home';
+import Formulario from './components/Formulario';
+import HistorialInformes from './components/historialInformes/HistorialInformes';
+import RedaccionMejorada from './components/helpers/mejoraRedaccion';
+import FormularioComponentes from './components/FormularioComponentes/FormularioComponentes';
+import FormularioActivos from './components/FormularioActivos/FormularioActivos';
+
+import Registro from './components/Auth/Registro';
+import Login from './components/Auth/Login';
+import CambiarPassword from './components/Auth/CambiarContrasenia';
+import RecuperarPassword from './components/Auth/RecuperarPassword';
+import RestablecerPassword from './components/Auth/ReestablecerPassword';
+
+import RutaProtegidaPorRol from './components/RutaProtegida/RutaProtegidaPorRol';
+import VistaPreviaPage from './components/VistaPreviaPage';
+import InformesPendientes from './components/historialInformes/InformesPendientes';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
+        <Route path="/recuperar-password" element={<RecuperarPassword />} />
+        <Route path="/restablecer-password" element={<RestablecerPassword />} />
+        <Route path="/cambiar-password" element={<CambiarPassword />} />
+
+        {/* Rutas protegidas para Técnicos */}
+        <Route
+          path="/home"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <Home />
+            </RutaProtegidaPorRol>
+          }
+        />
+        <Route
+          path="/formularioEquipos"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <FormularioActivos />
+            </RutaProtegidaPorRol>
+          }
+        />
+        <Route
+          path="/formularioComponentes"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <FormularioComponentes />
+            </RutaProtegidaPorRol>
+          }
+        />
+        <Route
+          path="/vista-previa"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <VistaPreviaPage />
+            </RutaProtegidaPorRol>
+          }
+        />
+
+        {/* Rutas protegidas para Admins o Historial */}
+        <Route
+          path="/historial-informes"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <HistorialInformes />
+            </RutaProtegidaPorRol>
+          }
+        />
+
+        <Route
+          path="/aprobaciones-pendientes"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Aprobador']}>
+              <InformesPendientes />
+            </RutaProtegidaPorRol>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
