@@ -15,14 +15,8 @@ import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import { saveAs } from 'file-saver';
 
-import {
-
-    ModalFirmaOverlay,
-    ModalFirmaContenido,
-    BotonGuardar,
-    BotonFirmar
-} from '../FormularioStyles';
 import {
     obtenerTecnicos,
     obtenerUsuarios,
@@ -84,6 +78,7 @@ const FormularioActivos = () => {
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [openModalAprobadores, setOpenModalAprobadores] = useState(false);
 
     const navigate = useNavigate();
 
@@ -292,6 +287,40 @@ const FormularioActivos = () => {
         value: u.id
     }));
 
+    const handleDescargarPDFConSelector = async () => {
+        if (!pdfURL || !window.showSaveFilePicker) {
+            toast.warning("Tu navegador no permite seleccionar ubicación de guardado.");
+            return;
+        }
+
+        try {
+            const response = await fetch(pdfURL);
+            const blob = await response.blob();
+
+            const nombreArchivo = `${nombreArchivoGenerado || 'Informe_Tecnico'}.pdf`;
+
+            const fileHandle = await window.showSaveFilePicker({
+                suggestedName: nombreArchivo,
+                types: [
+                    {
+                        description: 'Archivo PDF',
+                        accept: { 'application/pdf': ['.pdf'] },
+                    },
+                ],
+            });
+
+            const writableStream = await fileHandle.createWritable();
+            await writableStream.write(blob);
+            await writableStream.close();
+
+            toast.success("✅ PDF guardado correctamente.");
+        } catch (error) {
+            console.error("Error al guardar el archivo:", error);
+            toast.error("❌ No se pudo guardar el archivo.");
+        }
+    };
+
+
     const opcionesEquipos = equipos.map(u => ({
         label: u.NOM_EQUIPO,
         value: u.id
@@ -414,7 +443,7 @@ const FormularioActivos = () => {
         });
     };
 
-   
+
     const handleEnviarParaAprobacion = async () => {
         if (!aprobadoresSeleccionados || aprobadoresSeleccionados.length === 0) {
             toast.warning("Debe seleccionar al menos un aprobador.");
@@ -501,7 +530,7 @@ const FormularioActivos = () => {
                     if (resultado.success) {
                         const url = URL.createObjectURL(resultado.blob);
                         setPdfURL(url);
-                        toast.success('✅ Se cargó la firma correctamente y se actualizó la vista previa.');
+                        toast.success('✅ Se cargó la firma correctamente');
                     } else {
                         toast.error('❌ Error al regenerar el PDF con la firma.');
                     }
@@ -515,7 +544,8 @@ const FormularioActivos = () => {
     };
 
     const handleGenerarYMostrarInforme = async () => {
-        console.log('Data del fomrulario:',formData);
+
+        console.log('Data del fomrulario:', formData);
         if (!validarCamposObligatorios()) return;
 
         // Validar que la firma esté presente
@@ -530,6 +560,7 @@ const FormularioActivos = () => {
             );
 
             const nombreArchivo = `INFORME_TÉCNICO_${formData.requerimiento}_${formData.usuario}`.replace(/\s+/g, '_');
+            setNombreArchivoGenerado(nombreArchivo);
 
             const datosParaGuardar = {
                 ...formData,
@@ -575,6 +606,8 @@ const FormularioActivos = () => {
 
                 setIdInforme(idInforme);
                 setMostrarModalPDF(true);
+                const url = URL.createObjectURL(resultado.blob);
+                setPdfURL(url);
                 console.log('se actualizó la vista con ID de informes', idInforme)
 
             } else {
@@ -593,7 +626,8 @@ const FormularioActivos = () => {
 
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
             <PaginaCompleta>
-                <HomeButton />
+
+                {!mostrarModalPDF && <HomeButton />}
                 <FormularioContenedor ref={formRef}>
                     <TituloFormulario>Formulario Informe Técnico Activos</TituloFormulario>
 
@@ -915,17 +949,51 @@ const FormularioActivos = () => {
                                 <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
                                     <Viewer fileUrl={pdfURL} plugins={[defaultLayoutPluginInstance]} />
                                 </Worker>
-
-
                             </div>
-                            {/* Botones de acción */}
-                            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                                <a href={pdfURL} download="Informe_Tecnico.pdf">
-                                    <button>Descargar PDF</button>
-                                </a>
-                                <button onClick={() => setMostrarModalPDF(false)}>Modificar Datos</button>
+                            <BotonContainer>
+                                <button className='btn-gris'
+                                    onClick={handleDescargarPDFConSelector}>
+                                    DESCARGAR PDF
+                                </button>
 
-                            </div>
+                                <button className='btn-azul'
+                                    onClick={() => {
+                                        setMostrarModalPDF(false);
+                                    }}
+                                > MODIFICAR DATOS</button>
+
+                                <button
+                                    type="button"
+                                    className="btn-rojo"
+                                    onClick={() => setOpenModalAprobadores(true)}
+                                >
+                                    ENVIAR PARA APROBACIÓN
+                                </button>
+
+                                {mostrarSelectorAprobadores && (
+                                    <div style={{ marginTop: '1rem' }}>
+                                        <label>Seleccionar Aprobadores:</label>
+                                        <Select
+                                            isMulti
+                                            options={aprobadoresDisponibles}
+                                            value={aprobadoresSeleccionados}
+                                            onChange={(seleccionados) => setAprobadoresSeleccionados(seleccionados)}
+                                            placeholder="Selecciona uno o más aprobadores"
+                                            styles={customSelectStyles(isDarkMode)}
+                                        />
+                                        <button
+                                            className="btn-azul"
+                                            style={{ marginTop: '10px' }}
+                                            onClick={handleEnviarParaAprobacion}
+                                        >
+                                            Confirmar Envío
+                                        </button>
+                                    </div>
+                                )}
+
+
+                            </BotonContainer>
+
                         </ModalContent>
                     </ModalOverlay>
                 )}
@@ -950,6 +1018,36 @@ const FormularioActivos = () => {
                     </DialogActions>
                 </Dialog>
                 }
+                {/* DIALOGO APROBADORES */}
+                <Dialog open={openModalAprobadores} onClose={() => setOpenModalAprobadores(false)}>
+                    <DialogTitle>Seleccionar Aprobadores</DialogTitle>
+                    <DialogContent>
+                        <p>Selecciona uno o más aprobadores para enviar el informe:</p>
+                        <Select
+                            isMulti
+                            options={aprobadoresDisponibles}
+                            value={aprobadoresSeleccionados}
+                            onChange={(seleccionados) => setAprobadoresSeleccionados(seleccionados)}
+                            placeholder="Selecciona aprobadores"
+                            styles={customSelectStyles(isDarkMode)}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setOpenModalAprobadores(false)} color="secondary">
+                            Cancelar
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setOpenModalAprobadores(false);
+                                handleEnviarParaAprobacion();
+                            }}
+                            color="primary"
+                        >
+                            Enviar
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+
             </PaginaCompleta>
 
         </ThemeProvider>

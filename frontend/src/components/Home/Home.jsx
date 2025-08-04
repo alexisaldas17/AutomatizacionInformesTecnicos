@@ -32,7 +32,7 @@ const Home = () => {
 
         <ContentGrid>
           <Link to="/formularioEquipos" style={{ textDecoration: 'none' }}>
-            <Section color="#007bff">
+            <Section color="#023047">
               <h2>Formulario Informes Técnicos Laptops / PCs</h2>
               <IconGroup>
                 <Icon>🖥️</Icon>
@@ -42,7 +42,7 @@ const Home = () => {
           </Link>
 
           <Link to="/formularioComponentes" style={{ textDecoration: 'none' }}>
-            <Section color="#cff134ff">
+            <Section color="#fb8500">
               <h2>Formulario Informes Técnicos Componentes</h2>
               <IconGroup>
                 <Icon>🖱️</Icon>
@@ -53,7 +53,7 @@ const Home = () => {
           </Link>
 
           <Link to="/historial-informes" style={{ textDecoration: 'none' }}>
-            <Section color="#376b36ff">
+            <Section color="#219ebc">
               <h2>Historial de Informes Técnicos</h2>
               <IconGroup>
                 <Icon>📄</Icon>

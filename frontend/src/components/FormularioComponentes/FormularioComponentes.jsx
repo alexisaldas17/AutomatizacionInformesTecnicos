@@ -13,6 +13,7 @@ import {
     BotonEliminar,
     AutocompleteContainer
 } from './FormularioComponentesStyles'; // Asegúrate de que la ruta sea correcta
+import HomeButton from '../HomeButton';
 
 const FormularioComponentes = () => {
 
@@ -132,6 +133,7 @@ const FormularioComponentes = () => {
 
     return (
         <PaginaCompleta>
+            <HomeButton />
             <FormularioContenedor onSubmit={handleGuardar} ref={formRef}>
                 <TituloFormulario>Formulario de Informe Técnico Componentes</TituloFormulario>
 

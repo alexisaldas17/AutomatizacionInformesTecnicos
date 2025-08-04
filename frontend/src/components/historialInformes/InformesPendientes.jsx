@@ -7,7 +7,13 @@ import {
     Detalle,
     GridContainer,
     Boton,
-    ComentarioInput
+    ComentarioInput,
+    TotalPendientes,
+    Loader,
+    LoadingContainer,
+    SpinnerIcon,
+    LoadingText,
+    ModalContent
 } from './InformesPendientesStyles';
 import ReactModal from 'react-modal';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
@@ -18,6 +24,10 @@ import UsuarioMenu from '../UsuarioMenu/UsuarioMenu';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from '../themes';
 import { usePrefersDarkMode } from '../../hooks/usePrefersDarkMode';
+import { FaUserCheck, FaUserClock, FaFilePdf, FaClipboardList } from 'react-icons/fa';
+import { BotonContainer } from '../FormularioStyles';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+
 
 ReactModal.setAppElement('#root'); // Required for accessibility
 
@@ -25,6 +35,16 @@ const InformesPendientes = () => {
 
     const [idAprobadorActual, setIdAprobadorActual] = useState(null);
     const isDarkMode = usePrefersDarkMode();
+    const [confirmarAprobacion, setConfirmarAprobacion] = useState(false);
+
+    const abrirConfirmacion = () => {
+        setConfirmarAprobacion(true);
+    };
+
+    const confirmarYEnviar = () => {
+        setConfirmarAprobacion(false);
+        manejarAprobacion('aprobado');
+    };
 
     const filtrarInformesPendientes = (data, idAprobador) => {
         return data.filter(informe => {
@@ -127,16 +147,25 @@ const InformesPendientes = () => {
     };
 
 
-    if (loading) return <p>Cargando informes pendientes...</p>;
+    if (loading) return (
+        <LoadingContainer>
+            <SpinnerIcon />
+            <LoadingText>Cargando informes pendientes...</LoadingText>
+        </LoadingContainer>
+    );
+
 
     return (
 
 
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
             <Container>
-                <UsuarioMenu />
+                {!modalAbierto && <UsuarioMenu />}
                 <h2>📄 Informes Técnicos Pendientes de Aprobación</h2>
-                <p>Total pendientes: {informes.length}</p>
+                <TotalPendientes>
+                    🔔 Total pendientes: {informes.length}
+                </TotalPendientes>
+
                 {informes.length === 0 ? (
                     <p>No hay informes pendientes.</p>
                 ) : (
@@ -146,15 +175,19 @@ const InformesPendientes = () => {
                                 key={informe.id}
                                 onClick={() => handleVerInforme(informe)}
                             >
-                                <h3>Requerimiento: {informe.requerimiento}</h3>
-                                <p><strong>Técnico:</strong> {informe.tecnico}</p>
+                                <h3><FaFilePdf style={{ marginRight: '8px' }} /> {informe.requerimiento}</h3>
+                                <p><strong><FaUserCheck /> Técnico:</strong> {informe.tecnico}</p>
                                 <ul>
                                     {informe.aprobadores.map((aprobador, index) => (
                                         <li key={index}>
-                                            {aprobador.nombre} - <strong>{aprobador.estado}</strong>
+                                            {aprobador.nombre} -
+                                            <strong style={{ color: aprobador.estado === 'Pendiente' ? 'orange' : 'green' }}>
+                                                {aprobador.estado}
+                                            </strong>
                                         </li>
                                     ))}
                                 </ul>
+
                             </InformeCard>
                         ))}
                     </GridContainer>
@@ -167,7 +200,7 @@ const InformesPendientes = () => {
                     contentLabel="Vista previa del informe"
                     style={{
                         overlay: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
                         },
                         content: {
                             top: '50%',
@@ -177,7 +210,7 @@ const InformesPendientes = () => {
                             marginRight: '-50%',
                             transform: 'translate(-50%, -50%)',
                             width: '70%',
-                            height: '90%',
+                            height: '100vh',
                             padding: '0',
                             display: 'flex',
                             flexDirection: 'column',
@@ -208,14 +241,44 @@ const InformesPendientes = () => {
                             onChange={(e) => setComentario(e.target.value)}
                             placeholder="Escribe un comentario..."
                         />
-                        <div style={{ display: 'flex', justifyContent: '' }}>
-                            <Boton className="aprobar" onClick={() => manejarAprobacion('aprobado')}>Aprobar</Boton>
-                            {/*                         <Boton className="rechazar" onClick={() => manejarAprobacion('rechazado')}>Rechazar</Boton>
- */}                        <Boton className="cerrar" onClick={() => setModalAbierto(false)}>Cerrar</Boton>
 
-                        </div>
+                        <BotonContainer>
+                            <Button variant="contained" color="success" onClick={abrirConfirmacion}>
+                                Aprobar
+                            </Button>
+
+                            <Dialog
+                                open={confirmarAprobacion}
+                                onClose={() => setConfirmarAprobacion(false)}
+                                maxWidth="xs"
+                                fullWidth
+                            >
+                                <DialogTitle>Confirmar aprobación</DialogTitle>
+                                <DialogContent>
+                                    <Typography>
+                                        ¿Estás seguro que deseas aprobar este informe técnico?
+                                    </Typography>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={() => setConfirmarAprobacion(false)} color="error">
+                                        Cancelar
+                                    </Button>
+                                    <Button onClick={confirmarYEnviar} color="success" variant="contained">
+                                        Aprobar
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+
+                            <Boton className="cerrar" onClick={() => setModalAbierto(false)}>Cerrar</Boton>
+                            <Boton className="rechazar" onClick={() => manejarAprobacion('rechazado')}>Rechazar</Boton>
+                        </BotonContainer>
+
                     </div>
+
                 </ReactModal>
+
+
+
                 <ToastContainer position="top-right" autoClose={3000} />
 
             </Container>

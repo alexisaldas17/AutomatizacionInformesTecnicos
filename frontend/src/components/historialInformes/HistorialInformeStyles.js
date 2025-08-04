@@ -66,7 +66,7 @@ export const Input = styled.input`
   min-width: 220px;
   font-size: 1rem;
   background-color: ${({ theme }) => theme.inputBackground};
-  color: ${({ theme }) => theme.inputText};
+  color: ${({ theme }) => theme.textFilter};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
@@ -185,7 +185,7 @@ export const PageSizeSelector = styled.div`
     border: 1px solid ${({ theme }) => theme.border};
     font-size: 1rem;
     background-color: ${({ theme }) => theme.inputBackground};
-    color: ${({ theme }) => theme.inputText};
+    color: ${({ theme }) => theme.textFilter};
   }
 `;
 
