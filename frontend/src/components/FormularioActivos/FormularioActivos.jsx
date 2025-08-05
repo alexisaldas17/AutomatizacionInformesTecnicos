@@ -52,6 +52,14 @@ const FormularioActivos = () => {
             borderColor: isDarkMode ? '#555' : '#ccc',
             color: isDarkMode ? '#f0f0f0' : '#333',
         }),
+        
+        input: (base) => ({
+            ...base,
+            color: isDarkMode ? '#f0f0f0' : '#333',
+            width: '100px', // o el ancho que prefieras
+            flex: 'none',   // evita que crezca automáticamente
+        }),
+
         menu: (base) => ({
             ...base,
             backgroundColor: isDarkMode ? '#2a2a2a' : '#fff',
