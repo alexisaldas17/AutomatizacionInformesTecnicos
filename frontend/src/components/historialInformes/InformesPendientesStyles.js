@@ -20,6 +20,19 @@ export const GridContainer = styled.div`
   margin-top: 20px;
 `;
 
+export const IconContainer = styled.div`
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+`;
+
+
+
 export const InformeCard = styled.div`
   background: ${({ theme }) => theme.cardBackground};
   border: 1px solid ${({ theme }) => theme.border};
@@ -54,6 +67,33 @@ export const InformeCard = styled.div`
   li {
     margin-bottom: 5px;
   }
+`;
+export const InformeCardHover = styled(InformeCard)`
+
+position: relative;
+  overflow: hidden;
+
+  &:hover .icon-overlay {
+    display: flex;
+  }
+
+  &:hover .card-content {
+    filter: blur(2px);
+    opacity: 0.6;
+  }
+
+`;
+
+export const IconOverlay = styled.div`
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
 `;
 
 export const Detalle = styled.div`

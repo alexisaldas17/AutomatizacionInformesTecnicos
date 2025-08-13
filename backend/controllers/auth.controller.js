@@ -2,6 +2,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const sql = require('mssql');
 const { ejecutarConsulta } = require('../services/db');
+const axios = require('axios');
+
+const POWER_AUTOMATE_URL = 'https://prod-10.westus.logic.azure.com:443/workflows/7ba5405e478a4f41ba65eb9d551f5223/triggers/manual/paths/invoke?api-version=2016-06-01';
+
 const codigosValidos = {
   'TEC-2025': 'Tecnico',
   'ADM-2025': 'Administrativo',
@@ -10,40 +14,67 @@ const codigosValidos = {
 
 };
 
+exports.enviarCorreoInforme = async (req, res) => {
+  const { idInforme, destinatario } = req.body;
 
-/* exports.registrarUsuario = async (req, res) => {
-  const { nombre, correo, password, codigo } = req.body;
-
-  if (!nombre || !correo || !password || !codigo) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-  }
-
-  const rol = codigosValidos[codigo];
-  if (!rol) {
-    return res.status(400).json({ error: 'Código de invitación inválido' });
+  if (!idInforme || !destinatario) {
+    return res.status(400).json({ error: 'idInforme y destinatario son obligatorios' });
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+    // 1. Obtener el archivo desde la base de datos
     const query = `
-      INSERT INTO Autenticacion (NOMBRE, CORREO, PASSWORD, ROL)
-      VALUES (@nombre, @correo, @password, @rol)
+      SELECT NOMBRE, ARCHIVO
+      FROM Informes_PDF
+      WHERE ID = @idInforme
     `;
 
-    await ejecutarConsulta(query, {
-      nombre: { type: sql.NVarChar, value: nombre },
-      correo: { type: sql.NVarChar, value: correo },
-      password: { type: sql.NVarChar, value: hashedPassword },
-      rol: { type: sql.NVarChar, value: rol }
+    const resultado = await ejecutarConsulta(query, {
+      idInforme: { type: sql.Int, value: idInforme }
     });
 
-    res.json({ success: true, message: 'Usuario registrado correctamente' });
+    if (resultado.length === 0) {
+      return res.status(404).json({ error: 'Informe no encontrado' });
+    }
+
+    const { NOMBRE: nombre_archivo, ARCHIVO: archivo_pdf } = resultado[0];
+
+    if (!archivo_pdf) {
+      return res.status(500).json({ error: 'El archivo está vacío o no se pudo recuperar' });
+    }
+
+    // 2. Convertir el archivo a base64
+    const archivoBase64 = Buffer.from(nombre_archivo).toString('base64');
+    console.log({
+      destinatario,
+      asunto: 'Informe Técnico',
+      cuerpo: 'Adjunto encontrarás el informe solicitado.',
+      archivoNombre: nombre_archivo,
+      archivoBase64,
+    });
+
+    // 3. Enviar los datos al flujo de Power Automate
+    await axios.post(POWER_AUTOMATE_URL, {
+      destinatario,
+      asunto: 'Informe Técnico',
+      cuerpo: 'Adjunto encontrarás el informe solicitado.',
+      archivoNombre: nombre_archivo,
+      archivoBase64,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+
+
+    res.json({ success: true, message: 'Correo enviado correctamente a través de Power Automate' });
   } catch (error) {
-    console.error('Error al registrar usuario:', error);
-    res.status(500).json({ error: 'Error al registrar usuario' });
+    console.error('Error al enviar correo:', error.message);
+    res.status(500).json({ error: 'Error interno al enviar correo' });
   }
-}; */
+};
+
 exports.registrarUsuario = async (req, res) => {
   const { nombre, correo, password, codigo } = req.body;
 

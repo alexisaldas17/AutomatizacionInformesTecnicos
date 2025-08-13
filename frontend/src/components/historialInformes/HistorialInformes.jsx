@@ -161,9 +161,6 @@ Quedo atento a cualquier pregunta o consulta que tenga.\n
         <HomeButton />
 
         <Container>
-          <LogoContainer>
-            <Logo src={logo} alt="Logo" />
-          </LogoContainer>
           <ContentWrapper>
             <Title>
               {/*   <AiOutlineFileText style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} /> */}
@@ -221,9 +218,9 @@ Quedo atento a cualquier pregunta o consulta que tenga.\n
 
                   <Th onClick={() => ordenarResultados('NUM_REQUERIMIENTO')}>
                     N° Requerimiento {orden.columna === 'NUM_REQUERIMIENTO' && (orden.ascendente ? '↑' : '↓')}</Th>
-                  <Th onClick={() => ordenarResultados('ESTADO')}>
+                  {/* <Th onClick={() => ordenarResultados('ESTADO')}>
                     Estado {orden.columna === 'ESTADO' && (orden.ascendente ? '↑' : '↓')}
-                  </Th>
+                  </Th> */}
                   <Th>Acciones</Th>
 
 
@@ -242,14 +239,14 @@ Quedo atento a cualquier pregunta o consulta que tenga.\n
                     <Td>{informe.USUARIO}</Td>
                     <Td>{informe.TECNICO}</Td>
                     <Td>{informe.NUM_REQUERIMIENTO}</Td>
-                    <Td>
+                    {/* <Td>
                       <IconButton>
                         {informe.ESTADO === 'APROBADO' && '✅ Aprobado'}
                         {informe.ESTADO === 'RECHAZADO' && '❌ Rechazado'}
                         {informe.ESTADO === 'PENDIENTE' && '⏳ Pendiente'}
                       </IconButton>
 
-                    </Td>
+                    </Td> */}
                     <Td>
                       {/* <IconButton
                       onClick={() =>

@@ -174,6 +174,12 @@ const InformesPendientes = () => {
                             <InformeCard
                                 key={informe.id}
                                 onClick={() => handleVerInforme(informe)}
+                                style={{
+                                    borderLeft: '6px solid #f39c12',
+                                    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.2s',
+                                    cursor: 'pointer',
+                                }}
                             >
                                 <h3><FaFilePdf style={{ marginRight: '8px' }} /> {informe.requerimiento}</h3>
                                 <p><strong><FaUserCheck /> Técnico:</strong> {informe.tecnico}</p>
@@ -269,8 +275,9 @@ const InformesPendientes = () => {
                                 </DialogActions>
                             </Dialog>
 
-                            <Boton className="cerrar" onClick={() => setModalAbierto(false)}>Cerrar</Boton>
-                            <Boton className="rechazar" onClick={() => manejarAprobacion('rechazado')}>Rechazar</Boton>
+                            <Button className="btn-rojo" onClick={() => manejarAprobacion('rechazado')}>Rechazar</Button>
+{/*                             <Button className="btn-gris" onClick={() => setModalAbierto(false)}>CERRAR</Button>
+ */}
                         </BotonContainer>
 
                     </div>

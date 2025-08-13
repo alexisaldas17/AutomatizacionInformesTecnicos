@@ -27,7 +27,7 @@ import styled from 'styled-components';
 export const LogoContainer = styled.div`
   position: absolute;
   top: 10px;
-  right: 10px;
+  left: 10px;
   z-index: 1000;
 `;
 

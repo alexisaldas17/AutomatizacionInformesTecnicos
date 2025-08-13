@@ -61,6 +61,17 @@ const Home = () => {
               </IconGroup>
             </Section>
           </Link>
+
+              <Link to="/mis-informes" style={{ textDecoration: 'none' }}>
+            <Section color="#657a38">
+              <h2>Mis Informes Aprobados/Pendientes</h2>
+              <IconGroup>
+                <Icon>✅</Icon>
+                <Icon>⏳ </Icon>
+              </IconGroup>
+            </Section>
+          </Link>
+
         </ContentGrid>
       </HomeContainer>
 

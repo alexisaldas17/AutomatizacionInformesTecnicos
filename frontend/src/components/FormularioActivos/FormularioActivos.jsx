@@ -52,7 +52,7 @@ const FormularioActivos = () => {
             borderColor: isDarkMode ? '#555' : '#ccc',
             color: isDarkMode ? '#f0f0f0' : '#333',
         }),
-        
+
         input: (base) => ({
             ...base,
             color: isDarkMode ? '#f0f0f0' : '#333',
@@ -466,9 +466,16 @@ const FormularioActivos = () => {
             const idInforme = obtenerID.data.id;
             const idsAprobadores = aprobadoresSeleccionados.map(ap => ap.value);
 
+            // Obtener el ID del técnico desde localStorage
+            const idTecnico = parseInt(localStorage.getItem("id"), 10);
+
+            //xconst idTecnico = localStorage.getItem("id");
+            console.log(idTecnico)
+
             const response = await axios.post("http://172.20.70.113:3000/api/aprobaciones/enviar-aprobacion", {
                 idInforme,
-                aprobadores: idsAprobadores
+                aprobadores: idsAprobadores,
+                idTecnico
             });
 
             if (response.data.success) {
@@ -481,7 +488,13 @@ const FormularioActivos = () => {
             }
         } catch (error) {
             console.error("Error al enviar para aprobación:", error);
-            toast.error("❌ Ocurrió un error al enviar para aprobación.");
+
+            if (error.response && error.response.status === 400) {
+                const mensaje = error.response.data?.message || "Solicitud inválida.";
+                toast.info(`❌ ${mensaje}`);
+            } else {
+                toast.error("❌ Ocurrió un error al enviar para aprobación.");
+            }
         }
     };
 
@@ -959,10 +972,11 @@ const FormularioActivos = () => {
                                 </Worker>
                             </div>
                             <BotonContainer>
-                                <button className='btn-gris'
+
+                                {/* <button className='btn-gris'
                                     onClick={handleDescargarPDFConSelector}>
                                     DESCARGAR PDF
-                                </button>
+                                </button>*/}
 
                                 <button className='btn-azul'
                                     onClick={() => {

@@ -1,7 +1,5 @@
 const { ejecutarConsulta } = require('../services/db');
 const sql = require('mssql');
-const { Client } = require('@microsoft/microsoft-graph-client');
-const { ClientSecretCredential } = require('@azure/identity');
 const axios = require('axios');
 
 const { notificarTecnico } = require('../websocketServer'); // Ajusta la ruta según tu estructura
@@ -80,78 +78,57 @@ ORDER BY i.ID, ap.NOMBRE
   }
 };
 
-
-/* exports.aprobarInforme = async (req, res) => {
-  const { idInforme, idAprobador, comentario } = req.body;
-
-  if (!idInforme || !idAprobador) {
-    return res.status(400).json({ error: 'Datos incompletos' });
-  }
+// GET /api/aprobaciones/por-tecnico/:idTecnico
+exports.obtenerAprobacionesPorTecnico = async (req, res) => {
+  const idTecnico = parseInt(req.params.idTecnico);
 
   try {
     const query = `
-      UPDATE Aprobaciones_Informe
-      SET ESTADO = 'Aprobado', FECHA_RESPUESTA = GETDATE(), COMENTARIO = @comentario
-      WHERE ID_INFORME = @idInforme AND ID_APROBADOR = @idAprobador
+      SELECT 
+        ai.ID AS idAprobacion,
+        ai.ID_INFORME,
+        ai.ID_APROBADOR,
+        ai.ESTADO,
+        ai.FECHA_SOLICITUD,
+        ai.FECHA_RESPUESTA,
+        ai.COMENTARIO,
+        i.NUM_REQUERIMIENTO AS requerimiento,
+        i.TECNICO AS nombreTecnico,
+        i.ARCHIVO AS rutaPdf,
+        a.NOMBRE AS nombreAprobador,
+        i.USUARIO,
+        i.EMAIL,
+        i.NOMBRE as nombreArchivo
+      FROM 
+        Aprobaciones_Informe ai
+      INNER JOIN 
+        Informes_PDF i ON ai.ID_INFORME = i.ID
+      INNER JOIN 
+        Autenticacion a ON ai.ID_APROBADOR = a.ID
+      WHERE 
+        ai.ID_TECNICO = @idTecnico
     `;
 
-    await ejecutarConsulta(query, {
-      idInforme: { type: sql.Int, value: idInforme },
-      idAprobador: { type: sql.Int, value: idAprobador },
-      comentario: { type: sql.NVarChar, value: comentario || '' }
+    const resultados = await ejecutarConsulta(query, {
+      idTecnico: { type: sql.Int, value: idTecnico }
     });
 
-    res.json({ success: true, message: 'Informe aprobado correctamente' });
+    const pendientes = resultados.filter(row => row.ESTADO === 'Pendiente');
+    const aprobados = resultados.filter(row => row.ESTADO === 'Aprobado');
+
+    res.json({
+      pendientes,
+      aprobados
+    });
   } catch (error) {
-    console.error('Error al aprobar informe:', error);
-    res.status(500).json({ error: 'Error al aprobar informe' });
-  }
-}; */
-
-
-/* exports.aprobarInforme = async (req, res) => {
-  const { idInforme, idAprobador, comentario } = req.body;
-  if (!idInforme || !idAprobador) {
-    return res.status(400).json({ error: 'Datos incompletos' });
-  }
-
-  try {
-    const query = `
-      UPDATE Aprobaciones_Informe
-      SET ESTADO = 'Aprobado', FECHA_RESPUESTA = GETDATE(), COMENTARIO = @comentario
-      WHERE ID_INFORME = @idInforme AND ID_APROBADOR = @idAprobador
-    `;
-    await ejecutarConsulta(query, {
-      idInforme: { type: sql.Int, value: idInforme },
-      idAprobador: { type: sql.Int, value: idAprobador },
-      comentario: { type: sql.NVarChar, value: comentario || '' }
-    });
-
-    // Obtener nombre del requerimiento y técnico
-    const datos = await ejecutarConsulta(`
-      SELECT NUM_REQUERIMIENTO AS requerimiento, TECNICO AS tecnico
-      FROM Informes_PDF WHERE ID = @idInforme
-    `, {
-      idInforme: { type: sql.Int, value: idInforme }
-    });
-
-    const { requerimiento, tecnico } = datos[0] || {};
-    if (tecnico) {
-      notificarTecnico(tecnico, `✅ Tu informe técnico "${requerimiento}" ha sido aprobado.`);
-    }
-
-    res.json({ success: true, message: 'Informe aprobado correctamente' });
-  } catch (error) {
-    console.error('Error al aprobar informe:', error);
-    res.status(500).json({ error: 'Error al aprobar informe' });
+    console.error('Error al obtener informes por técnico:', error);
+    res.status(500).json({ error: 'Error al obtener informes por técnico' });
   }
 };
 
- */
-
 
 exports.enviarParaAprobacion = async (req, res) => {
-  const { idInforme, aprobadores } = req.body;
+  const { idInforme, aprobadores, idTecnico } = req.body;
 
   // Función auxiliar para obtener el nombre del aprobador
   const obtenerNombreAprobador = async (idAprobador) => {
@@ -185,16 +162,17 @@ exports.enviarParaAprobacion = async (req, res) => {
 
       // Insertar nueva aprobación
       await ejecutarConsulta(`
-        INSERT INTO Aprobaciones_Informe (ID_INFORME, ID_APROBADOR, ESTADO)
-        VALUES (@idInforme, @idAprobador, 'Pendiente')
+        INSERT INTO Aprobaciones_Informe (ID_INFORME, ID_APROBADOR, ESTADO, ID_TECNICO)
+        VALUES (@idInforme, @idAprobador, 'Pendiente', @idTecnico)
       `, {
         idInforme: { type: sql.Int, value: idInforme },
-        idAprobador: { type: sql.Int, value: idAprobador }
+        idAprobador: { type: sql.Int, value: idAprobador },
+        idTecnico: { type: sql.Int, value: idTecnico }
       });
     }
     const nombreArchivo = await obtenerNombreArchivo(idInforme);
     const nombreTecnico = await obtenerNombreTecnico(idInforme);
-    await notificarTeams(nombreArchivo, nombreTecnico);
+    await notificarTeams(nombreArchivo, nombreTecnico); 
 
     res.json({ success: true, message: 'Informe enviado para aprobación.' });
   } catch (error) {
@@ -359,7 +337,7 @@ async function notificarAprobacionTeams(nombreArchivo, nombreTecnico, comentario
             {
               type: "Action.OpenUrl",
               title: "🔗 Ver informe aprobado",
-              url: "http://172.20.70.113:3001/#/informes-aprobados"
+              url: "http://172.20.70.113:3001/#/mis-informes"
             }
           ]
         }

@@ -7,14 +7,14 @@ import { lightTheme, darkTheme } from '../themes';
 import { usePrefersDarkMode } from '../../../src/hooks/usePrefersDarkMode';
 
 const Wrapper = styled.div`
-  position: absolute;
+  position: fixed;
   top: 20px;
-  left: 20px;
+  /* left: 20px; */
+  right: 20px;
   z-index: 1000;
 `;
 
 const IconButton = styled.button`
-  background: ;
   border: none;
   cursor: pointer;
   font-size: 28px;
@@ -24,7 +24,7 @@ const IconButton = styled.button`
 const Menu = styled.div`
   position: absolute;
   top: 40px;
-  left: 0;
+  right: 0;
   background-color: ${({ theme }) => theme.formBackground};
   border: 1px solid ${({ theme }) => theme.inputBorder};
   border-radius: 8px;

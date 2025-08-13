@@ -18,6 +18,7 @@ import RestablecerPassword from './components/Auth/ReestablecerPassword';
 import RutaProtegidaPorRol from './components/RutaProtegida/RutaProtegidaPorRol';
 import VistaPreviaPage from './components/VistaPreviaPage';
 import InformesPendientes from './components/historialInformes/InformesPendientes';
+import InformesPendientesAprobadosPorTecnico from './components/historialInformes/InformesPendientesAprobadosPorTecnico';
 
 function App() {
   return (
@@ -38,6 +39,14 @@ function App() {
           element={
             <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
               <Home />
+            </RutaProtegidaPorRol>
+          }
+        />
+        <Route
+          path="/mis-informes"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+              <InformesPendientesAprobadosPorTecnico />
             </RutaProtegidaPorRol>
           }
         />
