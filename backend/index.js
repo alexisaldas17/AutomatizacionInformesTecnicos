@@ -12,7 +12,9 @@ const historialRoutes = require('./routes/historial.routes');
 const authRoutes = require('./routes/auth.routes');
 const aprobacionesRoutes = require('./routes/aprobaciones.routes');
 const authRecoveryRoutes = require('./routes/authRecovery.routes');
-const notificaciones = require('./routes/notificaciones.routes');
+/* const notificacionesRoutes = require('./routes/notificaciones.routes');
+ */const componentesRoutes = require('./routes/componentes.routes');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -34,10 +36,8 @@ app.use('/api/historial', historialRoutes);
 app.use('/api/aprobaciones', aprobacionesRoutes);
 app.use('/api/auth', authRoutes );
 app.use('/api/authRecovery', authRecoveryRoutes);
-app.use('/api/notificaciones', notificaciones);
-
-
-
+/* app.use('/api/notificaciones', notificacionesRoutes);
+ */app.use('/api/componentes', componentesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, '172.20.70.113', () => {

@@ -3,11 +3,9 @@ import React from 'react';
  */import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Home from './components/home/Home';
-import Formulario from './components/Formulario';
-import HistorialInformes from './components/historialInformes/HistorialInformes';
-import RedaccionMejorada from './components/helpers/mejoraRedaccion';
-import FormularioComponentes from './components/FormularioComponentes/FormularioComponentes';
-import FormularioActivos from './components/FormularioActivos/FormularioActivos';
+import HistorialInformes from './components/Informes/Historial/HistorialInformes';
+import FormularioComponentes from './components/Formulario/FormularioComponentes/FormularioComponentes';
+import FormularioActivos from './components/Formulario/FormularioActivos/FormularioActivos';
 
 import Registro from './components/Auth/Registro';
 import Login from './components/Auth/Login';
@@ -15,10 +13,10 @@ import CambiarPassword from './components/Auth/CambiarContrasenia';
 import RecuperarPassword from './components/Auth/RecuperarPassword';
 import RestablecerPassword from './components/Auth/ReestablecerPassword';
 
-import RutaProtegidaPorRol from './components/RutaProtegida/RutaProtegidaPorRol';
-import VistaPreviaPage from './components/VistaPreviaPage';
-import InformesPendientes from './components/historialInformes/InformesPendientes';
-import InformesPendientesAprobadosPorTecnico from './components/historialInformes/InformesPendientesAprobadosPorTecnico';
+import RutaProtegidaPorRol from './components/services/RutaProtegida/RutaProtegidaPorRol';
+import VistaPreviaPage from './components/Informes/VistaPrevia/VistaPreviaPage';
+import InformesPendientes from './components/Informes/InformesPendientes';
+import InformesPendientesAprobadosPorTecnico from './components/Informes/InformesPendientesAprobadosPorTecnico';
 
 function App() {
   return (

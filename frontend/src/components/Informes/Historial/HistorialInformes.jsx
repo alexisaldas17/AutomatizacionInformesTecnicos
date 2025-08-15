@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
-import { verPDF } from '../services/pdfService';
+import { verPDF } from '../../services/pdfService';
 import { FiSearch } from 'react-icons/fi';
 import { AiOutlineFileText } from 'react-icons/ai'
 import { useLocation } from 'react-router-dom';
@@ -8,11 +8,10 @@ import { FiMail } from 'react-icons/fi';
 import { AiOutlineEye } from 'react-icons/ai';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { FiXCircle } from 'react-icons/fi';
-import logo from '../../assets/LOGO_TCS.png';
-import { Logo } from '../home/HomeStyles';
+import logo from '../../../assets/LOGO_TCS.png';
 import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from '../themes';
-import { usePrefersDarkMode } from '../../hooks/usePrefersDarkMode';
+import { lightTheme, darkTheme } from '../../themes';
+import { usePrefersDarkMode } from '../../../hooks/usePrefersDarkMode';
 
 import {
   Container,
@@ -31,8 +30,7 @@ import {
   ContentWrapper,
   TableRow
 } from './HistorialInformeStyles';
-import HomeButton from '../HomeButton';
-import { LogoContainer } from '../home/HomeStyles';
+import HomeButton from '../../Home/HomeButton';
 
 const HistorialInformes = () => {
   const [filtros, setFiltros] = useState({
@@ -204,9 +202,9 @@ Quedo atento a cualquier pregunta o consulta que tenga.\n
               <thead>
                 <TableRow>
 
-                  <Th onClick={() => ordenarResultados('ID')}>
+                  {/* <Th onClick={() => ordenarResultados('ID')}>
                     ID
-                  </Th>
+                  </Th> */}
                   <Th onClick={() => ordenarResultados('FECHA')}>
                     Fecha {orden.columna === 'FECHA' && (orden.ascendente ? '↑' : '↓')}</Th>
 
@@ -233,7 +231,7 @@ Quedo atento a cualquier pregunta o consulta que tenga.\n
                     key={informe.ID}
                     className={informe.ID.toString() === idResaltado ? 'resaltado' : ''}
                   >
-                    <Td>{informe.ID}</Td>
+                    {/* <Td>{informe.ID}</Td> */}
                     {/*  <Td>{informe.NOMBRE}</Td> */}
                     <Td>{new Date(informe.FECHA).toLocaleDateString()}</Td>
                     <Td>{informe.USUARIO}</Td>

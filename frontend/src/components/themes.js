@@ -14,7 +14,12 @@ export const lightTheme = {
   cardBackground: '#023047',
   subtext: '#e2dadaff',
   textCard: '#eff0f1ff',
-  cardHover: '#219ebc'
+  cardHover: '#219ebc',
+  rowHover: '#adb5bd',
+  tableHeader: '#003566',
+  textHeader: '#ffffff',
+ /*  tableBackground: '#003566', */
+
 
 };
 
@@ -38,5 +43,10 @@ export const darkTheme = {
   textComentario: '#202122ff',
   rowHover: '#b0c4b1',
   iconHover: '#b0c4b1',
+  tableHeader: '#003566',
+  tableBackground: '#f8f9fa',
+  textHeader: '#ffffff',
+  textTD: '#333333',
+  iconColor: '#333333',
 
 };

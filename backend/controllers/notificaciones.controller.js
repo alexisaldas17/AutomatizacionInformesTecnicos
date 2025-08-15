@@ -1,4 +1,4 @@
-
+/* 
 const axios = require('axios');
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
@@ -85,3 +85,4 @@ exports.notificarTecnico = async (req, res) => {
     res.status(500).json({ error: 'No se pudo enviar el mensaje al técnico' });
   }
 };
+ */

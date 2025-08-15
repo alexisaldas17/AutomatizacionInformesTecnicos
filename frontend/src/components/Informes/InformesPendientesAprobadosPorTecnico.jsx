@@ -10,7 +10,12 @@ import {
     Loader,
     IconContainer,
     InformeCardHover,
-    IconOverlay
+    IconOverlay,
+    LoadingContainer,
+    SpinnerIcon,
+    LoadingText,
+    NoInformesMessage,
+    Title
 } from './InformesPendientesStyles';
 import ReactModal from 'react-modal';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
@@ -21,7 +26,7 @@ import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from '../themes';
 import { usePrefersDarkMode } from '../../hooks/usePrefersDarkMode';
 import { FaClock, FaCheckCircle, FaUserCheck, FaFilePdf, FaEdit, FaEnvelope } from 'react-icons/fa';
-import HomeButton from '../HomeButton';
+import HomeButton from '../Home/HomeButton';
 
 ReactModal.setAppElement('#root');
 
@@ -87,15 +92,25 @@ const InformesPendientesAprobadosPorTecnico = () => {
         }
     };
 
-    if (loading) return <Loader>Cargando informes...</Loader>;
+    if (loading) return (
+        <LoadingContainer>
+            <SpinnerIcon />
+            <LoadingText>Cargando Informes ...</LoadingText>
+        </LoadingContainer>
+    );
 
     return (
         <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
             <Container>
                 <HomeButton />
                 {!modalAbierto && <UsuarioMenu />}
-                <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>📄 Informes Técnicos Aprobados / Pendientes</h2>
-
+                <div>
+                    <Title>
+                        Informes Técnicos Aprobados / Pendientes
+                    </Title>
+                </div>
+              
+                                
                 {/* 🔀 Botones de pestañas */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
                     <button
@@ -132,78 +147,85 @@ const InformesPendientesAprobadosPorTecnico = () => {
 
                 {/* 📋 Renderizado condicional */}
                 <GridContainer>
-                    {(tabActiva === 'pendientes' ? informesPendientes : informesAprobados).map((inf, index) => {
-                        const fecha = new Date(tabActiva === 'pendientes' ? inf.FECHA_SOLICITUD : inf.FECHA_RESPUESTA).toLocaleString('es-EC', {
-                            timeZone: 'America/Guayaquil',
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                        });
 
-                        const isAprobado = inf.ESTADO === 'Aprobado';
+                    {(tabActiva === 'pendientes' ? informesPendientes : informesAprobados).length === 0 ? (
+                        <NoInformesMessage>
+                            {tabActiva === 'pendientes' ? 'No existen informes Pendientes' : 'No existen informes Aprobados'}
+                        </NoInformesMessage>
+                    ) : (
+                        (tabActiva === 'pendientes' ? informesPendientes : informesAprobados).map((inf, index) => {
+                            const fecha = new Date(tabActiva === 'pendientes' ? inf.FECHA_SOLICITUD : inf.FECHA_RESPUESTA).toLocaleString('es-EC', {
+                                timeZone: 'America/Guayaquil',
+                                year: 'numeric',
+                                month: '2-digit',
+                                day: '2-digit',
+                            });
 
-                        if (isAprobado) {
-                            return (
-                                <InformeCardHover
-                                    key={`informe-aprobado-${inf.ID || inf.id || index}`}
-                                    onClick={() => handleVerInforme(inf)}
-                                    style={{
-                                        borderLeft: '6px solid #2ecc71',
-                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                                        transition: 'transform 0.2s',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    <IconOverlay className="icon-overlay">
-                                        <FaEdit style={{ fontSize: '24px', cursor: 'pointer' }}
-                                            title="Editar"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toast.info(`Editar informe ${inf.ID || inf.id}`);
-                                            }}
-                                        />
-                                        <FaEnvelope
-                                            style={{ fontSize: '24px', cursor: 'pointer' }}
-                                            title="Enviar correo"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                console.log(inf.ID_INFORME)
-                                                enviarCorreo(inf.ID_INFORME, inf.EMAIL); // puedes usar un input dinámico
+                            const isAprobado = inf.ESTADO === 'Aprobado';
 
-                                                // toast.success(`Enviar correo informe ${inf.ID || inf.id}`);
-                                            }}
-                                        />
-                                    </IconOverlay>
-                                    <div className="card-content">
-                                        <h3>📌 {inf.requerimiento}</h3>
-                                        <p>📅 Fecha: <strong>{fecha}</strong></p>
-                                        <p>📍 Estado: <strong style={{ color: '#2ecc71' }}>{inf.ESTADO}</strong></p>
-                                        <p>👤 <strong>Aprobado por:</strong> {inf.nombreAprobador}</p>
-                                        <p>💬 <strong>Comentario:</strong> <span style={{ fontStyle: 'italic' }}>{inf.COMENTARIO}</span></p>
-                                    </div>
-                                </InformeCardHover>
-                            );
-                        } else {
-                            return (
-                                <InformeCard
-                                    key={`informe-pendiente-${inf.ID || inf.id || index}`}
-                                    onClick={() => handleVerInforme(inf)}
-                                    style={{
-                                        borderLeft: '6px solid #f39c12',
-                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                                        transition: 'transform 0.2s',
-                                        cursor: 'pointer',
-                                    }}
-                                >
-                                    <div className="card-content">
-                                        <h3>📌 {inf.requerimiento}</h3>
-                                        <p>📅 Fecha: <strong>{fecha}</strong></p>
-                                        <p>📍 Estado: <strong style={{ color: '#e67e22' }}>{inf.ESTADO}</strong></p>
-                                    </div>
-                                </InformeCard>
-                            );
-                        }
-                    })}
+                            if (isAprobado) {
+                                return (
+                                    <InformeCardHover
+                                        key={`informe-aprobado-${inf.ID || inf.id || index}`}
+                                        onClick={() => handleVerInforme(inf)}
+                                        style={{
+                                            borderLeft: '6px solid #2ecc71',
+                                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.2s',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <IconOverlay className="icon-overlay">
+                                            <FaEdit style={{ fontSize: '24px', cursor: 'pointer' }}
+                                                title="Editar"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toast.info(`Editar informe ${inf.ID || inf.id}`);
+                                                }}
+                                            />
+                                            <FaEnvelope
+                                                style={{ fontSize: '24px', cursor: 'pointer' }}
+                                                title="Enviar correo"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    console.log(inf.ID_INFORME)
+                                                    enviarCorreo(inf.ID_INFORME, inf.EMAIL); // puedes usar un input dinámico
+
+                                                    // toast.success(`Enviar correo informe ${inf.ID || inf.id}`);
+                                                }}
+                                            />
+                                        </IconOverlay>
+                                        <div className="card-content">
+                                            <h3>📌 {inf.requerimiento}</h3>
+                                            <p>📅 Fecha: <strong>{fecha}</strong></p>
+                                            <p>📍 Estado: <strong style={{ color: '#2ecc71' }}>{inf.ESTADO}</strong></p>
+                                            <p>👤 <strong>Aprobado por:</strong> {inf.nombreAprobador}</p>
+                                            <p>💬 <strong>Comentario:</strong> <span style={{ fontStyle: 'italic' }}>{inf.COMENTARIO}</span></p>
+                                        </div>
+                                    </InformeCardHover>
+                                );
+                            } else {
+                                return (
+                                    <InformeCard
+                                        key={`informe-pendiente-${inf.ID || inf.id || index}`}
+                                        onClick={() => handleVerInforme(inf)}
+                                        style={{
+                                            borderLeft: '6px solid #f39c12',
+                                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.2s',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        <div className="card-content">
+                                            <h3>📌 {inf.requerimiento}</h3>
+                                            <p>📅 Fecha: <strong>{fecha}</strong></p>
+                                            <p>📍 Estado: <strong style={{ color: '#e67e22' }}>{inf.ESTADO}</strong></p>
+                                        </div>
+                                    </InformeCard>
+                                );
+                            }
+                        })
+                    )}
                 </GridContainer>
 
 

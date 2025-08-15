@@ -1,21 +1,17 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { exportarFormularioAPDF, generarPDFenMemoria } from '../helpers/pdfUtils';
-import EditorComentario from '../EditorComentario.jsx/EditorComentario';
-import { convert } from 'html-to-text';
-import VistaPreviaInforme from '../VistaPreviaInforme';
+import {  generarPDFenMemoria } from '../../helpers/pdfUtils';
+import EditorComentario from '../../EditorComentario/EditorComentario';
 import { Button } from '@mui/material';
-import ConfirmDialog from '../helpers/ConfirmDialog';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from '../themes';
-import { usePrefersDarkMode } from '../../../src/hooks/usePrefersDarkMode';
+import { lightTheme, darkTheme } from '../../themes';
+import { usePrefersDarkMode } from '../../../hooks/usePrefersDarkMode';
 import { Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
 import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/default-layout/lib/styles/index.css';
-import { saveAs } from 'file-saver';
 
 import {
     obtenerTecnicos,
@@ -23,7 +19,7 @@ import {
     obtenerUsuarioPorNombre,
     obtenerEquipoPorNombre,
     obtenerEquipos
-} from '../FormularioComponentes/FormularioComponentesServices';
+} from '../../services/FormularioComponentesServices';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -36,12 +32,11 @@ import {
     BotonContainer,
     ModalOverlay,
     ModalContent
-} from '../FormularioComponentes/FormularioComponentesStyles';
+} from '../FormularioStyles';
 import Select from 'react-select';
 import { FaCamera } from 'react-icons/fa'; // Ícono de cámara
-import { BotonEliminar } from '../../components/FormularioStyles'; // Ajusta la ruta si es necesario
-import HomeButton from '../HomeButton';
-import VistaPreviaPage from '../VistaPreviaPage';
+import { BotonEliminar } from '../../FormularioStyles'; // Ajusta la ruta si es necesario
+import HomeButton from '../../Home/HomeButton';
 
 const FormularioActivos = () => {
 
@@ -483,7 +478,45 @@ const FormularioActivos = () => {
                 setAprobadoresDisponibles([]);
                 setAprobadoresSeleccionados([]);
                 setMostrarSelectorAprobadores(false); // Oculta el botón y selector
-            } else {
+
+                // Esperar 1.5 segundos para mostrar el toast antes de redirigir
+                setTimeout(() => {
+                    setMostrarModalPDF(false);
+
+                    setFormData({
+                        equipo: '',
+                        modelo: '',
+                        marca: '',
+                        agencia: '',
+                        ipEquipo: '',
+                        numSerie: '',
+                        direccionMAC: '',
+                        codigoBarras: '',
+                        discoDuro: '',
+                        espacioLibre: '',
+                        memoriaRAM: '',
+                        procesador: '',
+                        velocidad: '',
+                        sistemaOperativo: '',
+                        version_so: '',
+                        tecnico: '',
+                        usuario: '',
+                        email: '',
+                        cargo: '',
+                        empresa: '',
+                        departamento: '',
+                        comentario: '',
+                        requerimiento: '',
+                        firma: null
+                    });
+
+                    setImagenesSeleccionadas([]);
+                    setFirmaBase64(null);
+
+                    navigate("/mis-informes");
+                }, 1500); // 1.5 segundos de espera
+            }
+            else {
                 toast.error("❌ Error al enviar para aprobación.");
             }
         } catch (error) {

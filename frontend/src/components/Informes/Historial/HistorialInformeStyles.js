@@ -12,7 +12,7 @@ export const Container = styled.div`
   justify-content: flex-start;
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
-  background-color: ${({ theme }) => theme.background};
+  background-color: ${({ theme }) => theme.backgroundHistorialInformes};
   color: ${({ theme }) => theme.text};
   min-height: 100vh;
   width: 100vw;
@@ -117,13 +117,13 @@ export const Th = styled.th`
   border-bottom: 2px solid ${({ theme }) => theme.border};
   text-align: left;
   font-weight: 600;
-  color: ${({ theme }) => theme.text};
+  color: ${({ theme }) => theme.textHeader};
 `;
 
 export const Td = styled.td`
   padding: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.border};
-  color: ${({ theme }) => theme.text};
+  color: ${({ theme }) => theme.textTD};
 
   &:last-child {
     display: flex;

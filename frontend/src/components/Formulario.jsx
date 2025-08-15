@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useFormularioLogic } from './FormularioLogic';
-import AutocompleteInput from './AutocompleteInput';
+import { useFormularioLogic } from './Formulario/FormularioLogic';
+import AutocompleteInput from './helpers/AutocompleteInput';
 import { generarInformeTecnico } from './helpers/excelUtils';
 import { exportarFormularioAPDF, generarPDFenMemoria } from './helpers/pdfUtils';
 import axios from 'axios';

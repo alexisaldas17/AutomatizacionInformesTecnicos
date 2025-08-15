@@ -183,6 +183,25 @@ export const CardResumen = styled.div`
   gap: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 `;
+
+export const Title = styled.h2`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-column: span 4;
+  padding: 1rem;
+  text-align: center;
+  color: ${({ theme }) => theme.text};
+  font-size: 1.5rem;
+`;
+
+export const NoInformesMessage = styled.div`
+  grid-column: span 4;
+  text-align: center;
+  color: ${({ theme }) => theme.text};
+  font-size: 1.2rem;
+`;
+
 export const Loader = styled.div`
   display: flex;
   flex-direction: column;

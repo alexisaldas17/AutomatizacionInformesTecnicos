@@ -1,4 +1,4 @@
-const AutocompleteInput = ({ label, name, value, options, onChange, onSelect, showSuggestions, setShowSuggestions, refEl }) => (
+/* const AutocompleteInput = ({ label, name, value, options, onChange, onSelect, showSuggestions, setShowSuggestions, refEl }) => (
   <div className="autocomplete-container" ref={refEl}>
     <label>{label}</label>
     <input
@@ -20,4 +20,4 @@ const AutocompleteInput = ({ label, name, value, options, onChange, onSelect, sh
   </div>
 );
 
-export default AutocompleteInput;
+export default AutocompleteInput; */

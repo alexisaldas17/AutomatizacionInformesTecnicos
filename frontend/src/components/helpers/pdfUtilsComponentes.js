@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 
 
-export const exportarFormularioAPDF = async (formRef, nombreArchivo, formData) => {
+export const exportarFormularioComponentesA_PDF = async (formRef, nombreArchivo, formData) => {
   // Si no se proporciona un nombre, se genera uno automáticamente
   if (!nombreArchivo) {
     const fecha = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
