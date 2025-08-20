@@ -36,8 +36,8 @@ app.use('/api/historial', historialRoutes);
 app.use('/api/aprobaciones', aprobacionesRoutes);
 app.use('/api/auth', authRoutes );
 app.use('/api/authRecovery', authRecoveryRoutes);
-/* app.use('/api/notificaciones', notificacionesRoutes);
- */app.use('/api/componentes', componentesRoutes);
+/* app.use('/api/notificaciones', notificacionesRoutes);*/
+app.use('/api/componentes', componentesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, '172.20.70.113', () => {

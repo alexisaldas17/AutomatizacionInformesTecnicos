@@ -149,7 +149,7 @@ exports.verPDF = async (req, res) => {
     const archivo = resultado[0].ARCHIVO;
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${nombreArchivo}"`);
+    res.setHeader('Content-Disposition', `inline; filename="${nombreArchivo}.pdf"`);
     res.send(archivo);
   } catch (error) {
     console.error('Error al recuperar el PDF:', error);

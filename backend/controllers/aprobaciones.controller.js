@@ -30,20 +30,20 @@ exports.estadoAprobacion = async (req, res) => {
 exports.obtenerInformesPendientes = async (req, res) => {
   try {
     const query = `
- SELECT 
-    i.ID AS idInforme,
-    i.NUM_REQUERIMIENTO AS requerimiento,
-    i.TECNICO AS tecnico,
-    i.ARCHIVO AS rutaPdf,
-    ai.ID AS idAprobacion,
-    ap.ID AS idAprobador,
-    ap.NOMBRE AS nombreAprobador,
-    ai.ESTADO
-FROM Informes_PDF i
-INNER JOIN Aprobaciones_Informe ai ON i.ID = ai.ID_INFORME
-INNER JOIN Autenticacion ap ON ai.ID_APROBADOR = ap.ID
-WHERE ai.ESTADO = 'Pendiente'
-ORDER BY i.ID, ap.NOMBRE
+          SELECT 
+              i.ID AS idInforme,
+              i.NUM_REQUERIMIENTO AS requerimiento,
+              i.TECNICO AS tecnico,
+              i.ARCHIVO AS rutaPdf,
+              ai.ID AS idAprobacion,
+              ap.ID AS idAprobador,
+              ap.NOMBRE AS nombreAprobador,
+              ai.ESTADO
+          FROM Informes_PDF i
+          INNER JOIN Aprobaciones_Informe ai ON i.ID = ai.ID_INFORME
+          INNER JOIN Autenticacion ap ON ai.ID_APROBADOR = ap.ID
+          WHERE ai.ESTADO = 'Pendiente'
+          ORDER BY i.ID, ap.NOMBRE
 
     `;
 
@@ -172,7 +172,7 @@ exports.enviarParaAprobacion = async (req, res) => {
     }
     const nombreArchivo = await obtenerNombreArchivo(idInforme);
     const nombreTecnico = await obtenerNombreTecnico(idInforme);
-    await notificarTeams(nombreArchivo, nombreTecnico); 
+    /* await notificarTeams(nombreArchivo, nombreTecnico);  */
 
     res.json({ success: true, message: 'Informe enviado para aprobación.' });
   } catch (error) {

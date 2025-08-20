@@ -39,8 +39,10 @@ export const verificarRequerimiento = async (numeroRequerimiento) => {
 }; */
 
 export const verPDF = (nombreArchivo) => {
-    const url = `http://172.20.70.113:3000/api/pdf/ver/${nombreArchivo}`;
-    window.open(url, '_blank');
+      const url = `http://172.20.70.113:3000/api/pdf/ver/${nombreArchivo}`;
+      window.open(url, '_blank');
+
+
 };
 
 export const guardarPDFEnBD = async (blob, nombreArchivo, datosAdicionales) => {
