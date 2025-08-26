@@ -172,7 +172,7 @@ exports.enviarParaAprobacion = async (req, res) => {
     }
     const nombreArchivo = await obtenerNombreArchivo(idInforme);
     const nombreTecnico = await obtenerNombreTecnico(idInforme);
-    /* await notificarTeams(nombreArchivo, nombreTecnico);  */
+    await notificarTeams(nombreArchivo, nombreTecnico); 
 
     res.json({ success: true, message: 'Informe enviado para aprobación.' });
   } catch (error) {

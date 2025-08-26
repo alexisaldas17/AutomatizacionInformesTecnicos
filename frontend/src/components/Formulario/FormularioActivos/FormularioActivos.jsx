@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import {  generarPDFenMemoria } from '../../helpers/pdfUtils';
+import {  generarPDFenMemoria } from '../../helpers/pdfUtilsActivos';
 import EditorComentario from '../../EditorComentario/EditorComentario';
 import { Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -544,7 +544,7 @@ const FormularioActivos = () => {
                 ipEquipo: equipoCompleto.DIRECCION_IP || '',
                 numSerie: equipoCompleto.NUM_SERIE || '',
                 direccionMAC: equipoCompleto.DIRECCION_MAC || '',
-                /* codigoBarras: equipoCompleto.DIRECCION_IP || '', */
+                codigoBarras: equipoCompleto.CODIGO || '',
                 discoDuro: equipoCompleto.CAPACIDAD_DISCO || '',
                 espacioLibre: equipoCompleto.ESPACIO_LIBRE_DISCO || '',
                 memoriaRAM: equipoCompleto.MEMORIA_FISICA || '',

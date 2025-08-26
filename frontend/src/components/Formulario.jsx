@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useFormularioLogic } from './Formulario/FormularioLogic';
 import AutocompleteInput from './helpers/AutocompleteInput';
 import { generarInformeTecnico } from './helpers/excelUtils';
-import { exportarFormularioAPDF, generarPDFenMemoria } from './helpers/pdfUtils';
+import { exportarFormularioAPDF, generarPDFenMemoria } from './helpers/pdfUtilsActivos';
 import axios from 'axios';
 import { FaCamera } from 'react-icons/fa'; // Ícono de cámara
 import { BotonEliminar } from './FormularioStyles'; // Ajusta la ruta si es necesario

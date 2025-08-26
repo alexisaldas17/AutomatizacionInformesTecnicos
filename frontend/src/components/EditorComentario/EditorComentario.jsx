@@ -1,11 +1,17 @@
-import React from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import TextAlign from '@tiptap/extension-text-align';
-import 'prosemirror-view/style/prosemirror.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBold, faItalic, faUnderline, faAlignJustify } from '@fortawesome/free-solid-svg-icons';
-import styled from 'styled-components';
+import React from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import TextAlign from "@tiptap/extension-text-align";
+import "prosemirror-view/style/prosemirror.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBold,
+  faItalic,
+  faUnderline,
+  faAlignJustify,
+} from "@fortawesome/free-solid-svg-icons";
+import styled from "styled-components";
+import { useEffect } from "react";
 
 const Toolbar = styled.div`
   margin-bottom: 1rem;
@@ -40,10 +46,16 @@ const EditorContainer = styled.div`
 `;
 
 const EditorComentario = ({ value, onChange }) => {
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [value]);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
-      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: value,
     onUpdate: ({ editor }) => {
@@ -54,37 +66,41 @@ const EditorComentario = ({ value, onChange }) => {
   if (!editor) return null;
 
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div style={{ marginBottom: "2rem" }}>
       <Toolbar>
         <StyledButton
+          aria-label="Negrita"
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
           title="Negrita"
-          className={editor.isActive('bold') ? 'active' : ''}
+          className={editor.isActive("bold") ? "active" : ""}
         >
           <FontAwesomeIcon icon={faBold} />
         </StyledButton>
         <StyledButton
+          aria-label="Cursiva"
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
           title="Cursiva"
-          className={editor.isActive('italic') ? 'active' : ''}
+          className={editor.isActive("italic") ? "active" : ""}
         >
           <FontAwesomeIcon icon={faItalic} />
         </StyledButton>
         <StyledButton
+          aria-label="Subrayado"
           type="button"
           onClick={() => editor.chain().focus().toggleUnderline().run()}
           title="Subrayado"
-          className={editor.isActive('underline') ? 'active' : ''}
+          className={editor.isActive("underline") ? "active" : ""}
         >
           <FontAwesomeIcon icon={faUnderline} />
         </StyledButton>
         <StyledButton
+          aria-label="Justificar"
           type="button"
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
           title="Justificar"
-          className={editor.isActive({ textAlign: 'justify' }) ? 'active' : ''}
+          className={editor.isActive({ textAlign: "justify" }) ? "active" : ""}
         >
           <FontAwesomeIcon icon={faAlignJustify} />
         </StyledButton>

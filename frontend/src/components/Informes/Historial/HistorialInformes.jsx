@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { verPDF } from '../../services/pdfService';
 import { FiSearch } from 'react-icons/fi';
 import { AiOutlineFileText } from 'react-icons/ai'
@@ -8,7 +8,6 @@ import { FiMail } from 'react-icons/fi';
 import { AiOutlineEye } from 'react-icons/ai';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { FiXCircle } from 'react-icons/fi';
-import logo from '../../../assets/LOGO_TCS.png';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme } from '../../themes';
 import { usePrefersDarkMode } from '../../../hooks/usePrefersDarkMode';
@@ -59,21 +58,7 @@ const HistorialInformes = () => {
       setPaginaActual(nuevaPagina);
     }
   };
-
-
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      buscarInformes();
-    }, 400); // Espera 400ms después del último cambio
-
-    return () => clearTimeout(delayDebounce);
-  }, [filtros]);
-
-  const handleChange = (e) => {
-    setFiltros({ ...filtros, [e.target.name]: e.target.value });
-  };
-
-  const buscarInformes = async () => {
+ const buscarInformes = useCallback(async () => {
     try {
       const response = await axios.get('http://172.20.70.113:3000/api/historial', {
         params: filtros
@@ -83,7 +68,21 @@ const HistorialInformes = () => {
     } catch (error) {
       console.error('Error al buscar informes:', error);
     }
+  }, [filtros]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      buscarInformes();
+    }, 400); // Espera 400ms después del último cambio
+
+    return () => clearTimeout(delayDebounce);
+  }, [filtros, buscarInformes]);
+
+  const handleChange = (e) => {
+    setFiltros({ ...filtros, [e.target.name]: e.target.value });
   };
+
+ 
 
   const limpiarFiltros = () => {
     setFiltros({
@@ -96,40 +95,6 @@ const HistorialInformes = () => {
     setResultados([]); // Opcional: limpia los resultados si quieres
   };
 
-  const enviarCorreoOutlook = async (correoUsuario, nombreArchivo, numeroRequerimiento, nombreUsuario) => {
-    const asunto = encodeURIComponent(`INFORME TECNICO ${numeroRequerimiento} ${nombreUsuario}`);
-    const cuerpo = encodeURIComponent(
-      `Estimad@ ${nombreUsuario},\n\nSe adjunta el correspondiente Informe Técnico relacionado con (REDACTAR PROBLEMA).\n
-A continuación, detallo el procedimiento que debe seguirse para continuar con el proceso:
-
-Flujo para realizar la ODT en el iHelp:
-1.           Ingresar a la URL : https://ihelp.bgr.com.ec/proactivanet/portal/
-2.           Servicios Administrativos > Abastecimiento Bienes y Servicios > Equipos de cómputo - oficina y licencias > Solicitud de compra de equipos de cómputo - oficina y licencias
- 
-Quedo atento a cualquier pregunta o consulta que tenga.\n
-`
-    );
-
-    // Abrir cliente de correo
-    window.location.href = `mailto:${correoUsuario}?subject=${asunto}&body=${cuerpo}`;
-
-    // Descargar automáticamente el archivo para que el usuario lo adjunte
-    /*     try {
-          const response = await axios.get(`http://172.20.70.113:3000/api/pdf/ver/${nombreArchivo}`, {
-            responseType: 'blob'
-          });
-    
-          const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = nombreArchivo;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        } catch (error) {
-          console.error('Error al descargar el archivo:', error);
-        } */
-  };
 
   const ordenarResultados = (columna) => {
     const esAscendente = orden.columna === columna ? !orden.ascendente : true;

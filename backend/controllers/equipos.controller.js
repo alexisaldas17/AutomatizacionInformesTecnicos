@@ -32,12 +32,15 @@ const obtenerEquipoPorNombre = async (req, res) => {
   const { nombre } = req.query;
   try {
     const query = `
-      SELECT NOM_EQUIPO, AGENCIA, SO, VERSION_SO, ARQUITECTURA_SO, NUM_SERIE,
-             FABRICANTE, MODELO, PROCESADOR, ARQ_PROCESADOR, VELOCIDAD_PROCESADOR,
-             CAPACIDAD_DISCO, MEMORIA_FISICA, ESPACIO_LIBRE_DISCO, DIRECCION_IP,
-             DIRECCION_MAC, VERSION_IE, VERSION_CHROME
-      FROM Inventario_Hardware
-      WHERE NOM_EQUIPO = @nombre
+              SELECT
+          h.NOM_EQUIPO, h.AGENCIA, h.SO, h.VERSION_SO, h.ARQUITECTURA_SO, h.NUM_SERIE,
+          h.FABRICANTE, h.MODELO, h.PROCESADOR, h.ARQ_PROCESADOR, h.VELOCIDAD_PROCESADOR,
+          h.CAPACIDAD_DISCO, h.MEMORIA_FISICA, h.ESPACIO_LIBRE_DISCO, h.DIRECCION_IP,
+          h.DIRECCION_MAC, h.VERSION_IE, h.VERSION_CHROME,
+          a.CODIGO
+        FROM Inventario_Hardware h
+        LEFT JOIN Inventario_Administrativo a ON h.NUM_SERIE = a.SERIE
+        WHERE h.NOM_EQUIPO = @nombre
     `;
     const resultado = await ejecutarConsulta(query, { nombre });
     res.json(resultado[0]);
