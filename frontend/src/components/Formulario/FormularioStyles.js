@@ -118,7 +118,7 @@ export const FilaFormulario = styled.div`
 
 
 export const BotonContainer = styled.div`
-  display: grid;
+  /* display: grid; */
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-top: 2rem;
@@ -172,6 +172,7 @@ export const BotonContainer = styled.div`
     background: linear-gradient(135deg, #6c757d, #5a6268);
   }
 `;
+
 
 export const BotonEliminar = styled.button`
   margin-top: 1rem;

@@ -3,7 +3,7 @@ import React from 'react';
  */import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Home from './components/home/Home';
-import HistorialInformes from './components/Informes/Historial/HistorialInformes';
+import HistorialInformes from './components/Informes/Historial/HistorialInformesActivos';
 import FormularioComponentes from './components/Formulario/FormularioComponentes/FormularioComponentes';
 import FormularioActivos from './components/Formulario/FormularioActivos/FormularioActivos';
 
@@ -17,6 +17,7 @@ import RutaProtegidaPorRol from './components/services/RutaProtegida/RutaProtegi
 import VistaPreviaPage from './components/Informes/VistaPrevia/VistaPreviaPage';
 import InformesPendientes from './components/Informes/InformesPendientes';
 import InformesPendientesAprobadosPorTecnico from './components/Informes/InformesPendientesAprobadosPorTecnico';
+import InformesTabs from './components/Informes/InformesTabs';
 
 function App() {
   return (
@@ -78,7 +79,7 @@ function App() {
           path="/historial-informes"
           element={
             <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
-              <HistorialInformes />
+              <InformesTabs />
             </RutaProtegidaPorRol>
           }
         />

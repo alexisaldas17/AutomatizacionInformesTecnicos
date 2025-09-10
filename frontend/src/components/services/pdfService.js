@@ -45,6 +45,13 @@ export const verPDF = (nombreArchivo) => {
 
 };
 
+export const verPDFPartes = (nombreArchivo) => {
+      const url = `http://172.20.70.113:3000/api/pdf/verPDF_Partes/${nombreArchivo}`;
+      window.open(url, '_blank');
+
+
+};
+
 export const guardarPDFEnBD = async (blob, nombreArchivo, datosAdicionales) => {
     const formData = new FormData();
     formData.append('archivo', blob, nombreArchivo); // archivo con nombre

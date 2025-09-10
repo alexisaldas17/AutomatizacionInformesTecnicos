@@ -157,6 +157,40 @@ exports.verPDF = async (req, res) => {
   }
 };
 
+exports.verPDF_Partes = async (req, res) => {
+  const { nombreArchivo } = req.params;
+
+  if (!nombreArchivo) {
+    return res.status(400).json({ error: 'Nombre de archivo no proporcionado' });
+  }
+
+  try {
+    const query = `
+      SELECT ARCHIVO, NOMBRE
+      FROM Informes_Componentes
+      WHERE NOMBRE = @nombre
+    `;
+
+    const params = {
+      nombre: { type: sql.NVarChar, value: nombreArchivo }
+    };
+
+    const resultado = await ejecutarConsulta(query, params);
+
+    if (!resultado || resultado.length === 0) {
+      return res.status(404).json({ error: 'Archivo no encontrado' });
+    }
+
+    const archivo = resultado[0].ARCHIVO;
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${nombreArchivo}.pdf"`);
+    res.send(archivo);
+  } catch (error) {
+    console.error('Error al recuperar el PDF:', error);
+    res.status(500).json({ error: 'Error al recuperar el PDF' });
+  }
+};
 exports.guardarPDF = async (req, res) => {
   const {
     nombreArchivo,

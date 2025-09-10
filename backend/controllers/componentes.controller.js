@@ -86,7 +86,7 @@ const actualizarPDF = async (req, res) => {
     pdf,
     firma,
     usuario,
-    area,
+    departamento,
     email,
     empresa,
     cargo,
@@ -116,7 +116,7 @@ const actualizarPDF = async (req, res) => {
         FIRMA = @firma,
         FECHA = GETDATE(),
         USUARIO = @usuario,
-        AREA = @area,
+        AREA = @departamento,
         MAIL = @email,
         EMPRESA = @empresa,
         CARGO = @cargo,
@@ -137,7 +137,7 @@ const actualizarPDF = async (req, res) => {
       archivo: { type: sql.VarBinary(sql.MAX), value: pdfBuffer },
       firma: { type: sql.VarBinary(sql.MAX), value: firmaBuffer },
       usuario: { type: sql.NVarChar, value: usuario || '' },
-      area: { type: sql.NVarChar, value: area || '' },
+      departamento: { type: sql.NVarChar, value: departamento || '' },
       email: { type: sql.NVarChar, value: email || '' },
       empresa: { type: sql.NVarChar, value: empresa || '' },
       cargo: { type: sql.NVarChar, value: cargo || '' },
@@ -191,7 +191,7 @@ const guardarPDF_Componentes = async (req, res) => {
     pdf,
     firma,
     usuario,
-    area,
+    departamento,
     email,
     empresa,
     cargo,
@@ -240,7 +240,7 @@ const guardarPDF_Componentes = async (req, res) => {
       )
       OUTPUT inserted.ID
       VALUES (
-        @nombre, @archivo, @firma, GETDATE(), @usuario, @area, @email, @empresa, @cargo, @tecnico,
+        @nombre, @archivo, @firma, GETDATE(), @usuario, @departamento, @email, @empresa, @cargo, @tecnico,
         @requerimiento, @agencia, @modelo, @marca, @numSerie,
         @codigoBarras, @comentario, @tipoComponente
       )
@@ -251,7 +251,7 @@ const guardarPDF_Componentes = async (req, res) => {
       archivo: { type: sql.VarBinary(sql.MAX), value: pdfBuffer },
       firma: { type: sql.VarBinary(sql.MAX), value: firmaBuffer },
       usuario: { type: sql.NVarChar, value: usuario || '' },
-      area: { type: sql.NVarChar, value: area || '' },
+      departamento: { type: sql.NVarChar, value: departamento || '' },
       email: { type: sql.NVarChar, value: email || '' },
       empresa: { type: sql.NVarChar, value: empresa || '' },
       cargo: { type: sql.NVarChar, value: cargo || '' },

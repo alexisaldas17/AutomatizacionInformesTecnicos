@@ -59,6 +59,9 @@ const FormularioComponentes = () => {
   const [aprobadoresSeleccionados, setAprobadoresSeleccionados] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [mostrarInputTipoComponente, setMostrarInputTipoComponente] =
+    useState(false);
+
   const navigate = useNavigate();
 
   const customSelectStyles = (isDarkMode) => ({
@@ -154,10 +157,13 @@ const FormularioComponentes = () => {
     cargarTipos();
   }, []);
 
-  const opcionesTiposComponentes = tiposComponentes.map((tc) => ({
-    label: tc.TIPO_COMPONENTE, // ajusta según el campo real
-    value: tc.ID,
-  }));
+  const opcionesTiposComponentes = [
+    ...tiposComponentes.map((tc) => ({
+      label: tc.TIPO_COMPONENTE,
+      value: tc.ID,
+    })),
+    { label: "Otros", value: "otros" },
+  ];
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -335,6 +341,7 @@ const FormularioComponentes = () => {
         imagenes: imagenesBase64,
         firma: firmaBase64,
       };
+      console.log("Datos para generar PDF:", datosParaGuardar);
       const resultado = await generarPDFenMemoria(datosParaGuardar);
       if (!resultado.success) {
         toast.error("❌ Error al generar el PDF.");
@@ -566,7 +573,7 @@ const FormularioComponentes = () => {
         <HomeButton />
         <FormularioContenedor onSubmit={handleGuardar} ref={formRef}>
           <TituloFormulario>
-            Formulario de Informe Técnico Componentes
+            Formulario de Informe Técnico Partes
           </TituloFormulario>
           <SeccionFormulario>
             <FilaFormulario>
@@ -635,6 +642,7 @@ const FormularioComponentes = () => {
                   onChange={handleChange}
                 />
               </div>
+
               <div>
                 <label htmlFor="empresa">Empresa</label>
                 <input
@@ -642,6 +650,16 @@ const FormularioComponentes = () => {
                   id="empresa"
                   name="empresa"
                   value={formData.empresa}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="departamento">Departamento</label>
+                <input
+                  type="text"
+                  id="departamento"
+                  name="departamento"
+                  value={formData.departamento}
                   onChange={handleChange}
                 />
               </div>
@@ -660,8 +678,10 @@ const FormularioComponentes = () => {
                     const tipoSeleccionado = opcion.label;
                     setFormData((prev) => ({
                       ...prev,
-                      tipoComponente: tipoSeleccionado,
+                      tipoComponente:
+                        tipoSeleccionado === "Otros" ? "" : tipoSeleccionado,
                     }));
+                    setMostrarInputTipoComponente(tipoSeleccionado === "Otros");
 
                     const marcas = [
                       ...new Set(
@@ -673,7 +693,7 @@ const FormularioComponentes = () => {
                       ),
                     ];
                     setMarcasFiltradas(marcas);
-                    setModelosFiltrados([]); // Limpiar modelos al cambiar tipo
+                    setModelosFiltrados([]);
                   }}
                   value={opcionesTiposComponentes.find(
                     (opt) => opt.label === formData.tipoComponente
@@ -682,6 +702,23 @@ const FormularioComponentes = () => {
                   styles={customSelectStyles(isDarkMode)}
                 />
               </div>
+
+              {mostrarInputTipoComponente && (
+                <div>
+                  <label htmlFor="tipoComponente">
+                    Nombre componente
+                  </label>
+                  <input
+                    type="text"
+                    id="tipoComponente"
+                    name="tipoComponente"
+                    value={formData.tipoComponente}
+                    onChange={handleChange}
+                    placeholder="Ej. Adaptador USB"
+                  />
+                </div>
+              )}
+
               <div>
                 <label htmlFor="marca">Marca</label>
                 {marcasFiltradas.length > 0 ? (
@@ -765,6 +802,16 @@ const FormularioComponentes = () => {
                   value={formData.numSerie}
                   onChange={handleChange}
                   placeholder="Ingresa el número de serie"
+                />
+              </div>
+              <div>
+                <label htmlFor="codigoBarras">Código de Barras</label>
+                <input
+                  type="text"
+                  name="codigoBarras"
+                  value={formData.codigoBarras}
+                  onChange={handleChange}
+                  placeholder="Ingresa el código de barras"
                 />
               </div>
             </FilaFormulario>

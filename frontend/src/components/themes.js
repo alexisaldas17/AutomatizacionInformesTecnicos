@@ -37,6 +37,7 @@ export const darkTheme = {
   backButtonBackground: '#555',
   backButtonHover: '#444',
   cardBackground: '#023047',
+  sectionBackground: '#2a2a2a',
   border: '1px solid',
   cardHover: '#219ebc',
   inputBackground: '#f0f0f0',
