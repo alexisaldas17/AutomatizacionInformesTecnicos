@@ -21,4 +21,9 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    port: 5000,
+    open: true,
+    host: '0.0.0.0',
+  },
 });

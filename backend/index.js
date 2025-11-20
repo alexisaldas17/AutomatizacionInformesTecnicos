@@ -16,7 +16,7 @@ const authRecoveryRoutes = require('./routes/authRecovery.routes');
  */const componentesRoutes = require('./routes/componentes.routes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Aumentar el límite de tamaño para JSON (por defecto es 100kb)
 app.use(express.json({ limit: '100mb' }));

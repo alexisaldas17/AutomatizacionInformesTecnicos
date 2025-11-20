@@ -1,29 +1,35 @@
-import React from 'react';
+import React from "react";
 /* import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
- */import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+ */ import {
+  HashRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
-import Home from './components/home/Home';
-import HistorialInformes from './components/Informes/Historial/HistorialInformesActivos';
-import FormularioComponentes from './components/Formulario/FormularioComponentes/FormularioComponentes';
-import FormularioActivos from './components/Formulario/FormularioActivos/FormularioActivos';
+import Home from "./components/home/Home";
+import HistorialInformes from "./components/Informes/Historial/HistorialInformesActivos";
+import FormularioComponentes from "./components/Formulario/FormularioComponentes/FormularioComponentes";
+import FormularioActivos from "./components/Formulario/FormularioActivos/FormularioActivos";
 
-import Registro from './components/Auth/Registro';
-import Login from './components/Auth/Login';
-import CambiarPassword from './components/Auth/CambiarContrasenia';
-import RecuperarPassword from './components/Auth/RecuperarPassword';
-import RestablecerPassword from './components/Auth/ReestablecerPassword';
+import Registro from "./components/Auth/Registro";
+import Login from "./components/Auth/Login";
+import CambiarPassword from "./components/Auth/CambiarContrasenia";
+import RecuperarPassword from "./components/Auth/RecuperarPassword";
+import RestablecerPassword from "./components/Auth/ReestablecerPassword";
 
-import RutaProtegidaPorRol from './components/services/RutaProtegida/RutaProtegidaPorRol';
-import VistaPreviaPage from './components/Informes/VistaPrevia/VistaPreviaPage';
-import InformesPendientes from './components/Informes/InformesPendientes';
-import InformesPendientesAprobadosPorTecnico from './components/Informes/InformesPendientesAprobadosPorTecnico';
-import InformesTabs from './components/Informes/InformesTabs';
-
+import RutaProtegidaPorRol from "./components/services/RutaProtegida/RutaProtegidaPorRol";
+import VistaPreviaPage from "./components/Informes/VistaPrevia/VistaPreviaPage";
+import InformesPendientes from "./components/Informes/InformesPendientesAprobacion";
+import InformesPendientesAprobadosPorTecnico from "./components/Informes/InformesPendientesAprobadosPorTecnico";
+import InformesTabs from "./components/Informes/InformesTabs";
+import EditarInformeTecnico from "./components/Informes/EditarInformeTecnico";
+/* import EditarInformeTecnico from "components/Informes/EditarInformeTecnico";
+ */
 function App() {
   return (
     <Router>
       <Routes>
-
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route path="/login" element={<Login />} />
@@ -36,7 +42,7 @@ function App() {
         <Route
           path="/home"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <Home />
             </RutaProtegidaPorRol>
           }
@@ -44,7 +50,7 @@ function App() {
         <Route
           path="/mis-informes"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <InformesPendientesAprobadosPorTecnico />
             </RutaProtegidaPorRol>
           }
@@ -52,7 +58,7 @@ function App() {
         <Route
           path="/formularioEquipos"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <FormularioActivos />
             </RutaProtegidaPorRol>
           }
@@ -60,7 +66,7 @@ function App() {
         <Route
           path="/formularioComponentes"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <FormularioComponentes />
             </RutaProtegidaPorRol>
           }
@@ -68,7 +74,7 @@ function App() {
         <Route
           path="/vista-previa"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <VistaPreviaPage />
             </RutaProtegidaPorRol>
           }
@@ -78,7 +84,7 @@ function App() {
         <Route
           path="/historial-informes"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Tecnico']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
               <InformesTabs />
             </RutaProtegidaPorRol>
           }
@@ -87,13 +93,21 @@ function App() {
         <Route
           path="/aprobaciones-pendientes"
           element={
-            <RutaProtegidaPorRol rolesPermitidos={['Aprobador']}>
+            <RutaProtegidaPorRol rolesPermitidos={["Aprobador"]}>
               <InformesPendientes />
             </RutaProtegidaPorRol>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route
+          path="/editar-informe/:id"
+          element={
+            <RutaProtegidaPorRol rolesPermitidos={["Tecnico"]}>
+              <EditarInformeTecnico />
+            </RutaProtegidaPorRol>
+          }
+        />
 
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

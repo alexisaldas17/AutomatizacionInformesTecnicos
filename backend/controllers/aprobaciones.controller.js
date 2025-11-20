@@ -29,40 +29,61 @@ exports.estadoAprobacion = async (req, res) => {
 
 exports.obtenerInformesPendientes = async (req, res) => {
   try {
-    const query = `
-          SELECT 
-              i.ID AS idInforme,
-              i.NUM_REQUERIMIENTO AS requerimiento,
-              i.TECNICO AS tecnico,
-              i.ARCHIVO AS rutaPdf,
-              ai.ID AS idAprobacion,
-              ap.ID AS idAprobador,
-              ap.NOMBRE AS nombreAprobador,
-              ai.ESTADO
-          FROM Informes_PDF i
-          INNER JOIN Aprobaciones_Informe ai ON i.ID = ai.ID_INFORME
-          INNER JOIN Autenticacion ap ON ai.ID_APROBADOR = ap.ID
-          WHERE ai.ESTADO = 'Pendiente'
-          ORDER BY i.ID, ap.NOMBRE
-
+    const queryInformesPDF = `
+      SELECT 
+          i.ID AS idInforme,
+          i.NUM_REQUERIMIENTO AS requerimiento,
+          i.TECNICO AS tecnico,
+          i.ARCHIVO AS rutaPdf,
+          ai.ID AS idAprobacion,
+          ap.ID AS idAprobador,
+          ap.NOMBRE AS nombreAprobador,
+          ai.ESTADO,
+          'PDF' AS tipoInforme
+      FROM Informes_PDF i
+      INNER JOIN Aprobaciones_Informe ai ON i.ID = ai.ID_INFORME
+      INNER JOIN Autenticacion ap ON ai.ID_APROBADOR = ap.ID
+      WHERE ai.ESTADO = 'Pendiente'
     `;
 
-    const resultados = await ejecutarConsulta(query);
+    const queryInformesComponentes = `
+      SELECT 
+          ic.ID AS idInforme,
+          ic.NUM_REQUERIMIENTO AS requerimiento,
+          ic.TECNICO AS tecnico,
+          ic.ARCHIVO AS rutaPdf,
+          ac.ID AS idAprobacion,
+          ap.ID AS idAprobador,
+          ap.NOMBRE AS nombreAprobador,
+          ac.ESTADO,
+          'COMPONENTE' AS tipoInforme
+      FROM Informes_Componentes ic
+      INNER JOIN Aprobaciones_Informe ac ON ic.ID = ac.ID_INFORME
+      INNER JOIN Autenticacion ap ON ac.ID_APROBADOR = ap.ID
+      WHERE ac.ESTADO = 'Pendiente'
+    `;
+
+    const [resultadosPDF, resultadosComponentes] = await Promise.all([
+      ejecutarConsulta(queryInformesPDF),
+      ejecutarConsulta(queryInformesComponentes),
+    ]);
 
     const informesMap = new Map();
 
-    resultados.forEach((row) => {
-      if (!informesMap.has(row.idInforme)) {
-        informesMap.set(row.idInforme, {
+    [...resultadosPDF, ...resultadosComponentes].forEach((row) => {
+      const key = `${row.tipoInforme}-${row.idInforme}`;
+      if (!informesMap.has(key)) {
+        informesMap.set(key, {
           id: row.idInforme,
           requerimiento: row.requerimiento,
           tecnico: row.tecnico,
           rutaPdf: row.rutaPdf,
+          tipo: row.tipoInforme,
           aprobadores: [],
         });
       }
 
-      informesMap.get(row.idInforme).aprobadores.push({
+      informesMap.get(key).aprobadores.push({
         id: row.idAprobador,
         nombre: row.nombreAprobador,
         estado: row.ESTADO,
@@ -169,10 +190,12 @@ WHERE
 
     const pendientes = resultados.filter((row) => row.ESTADO === "Pendiente");
     const aprobados = resultados.filter((row) => row.ESTADO === "Aprobado");
+    const rechazados = resultados.filter((row) => row.ESTADO === "Rechazado");
 
     res.json({
       pendientes,
       aprobados,
+      rechazados,
     });
   } catch (error) {
     console.error("Error al obtener informes por técnico:", error);
@@ -180,7 +203,7 @@ WHERE
   }
 };
 
-exports.enviarParaAprobacion = async (req, res) => {
+/* exports.enviarParaAprobacion = async (req, res) => {
   const { idInforme, aprobadores, idTecnico } = req.body;
 
   // Función auxiliar para obtener el nombre del aprobador
@@ -238,7 +261,84 @@ exports.enviarParaAprobacion = async (req, res) => {
     console.error("Error al enviar informe para aprobación:", error);
     res.status(500).json({ error: "Error al enviar informe para aprobación." });
   }
+}; */
+
+exports.enviarParaAprobacion = async (req, res) => {
+  const { idInforme, aprobadores, idTecnico } = req.body;
+
+  const obtenerNombreAprobador = async (idAprobador) => {
+    const query = `
+      SELECT NOMBRE FROM Autenticacion WHERE ID = @idAprobador
+    `;
+    const resultado = await ejecutarConsulta(query, {
+      idAprobador: { type: sql.Int, value: idAprobador },
+    });
+    return resultado[0]?.NOMBRE || "Desconocido";
+  };
+
+  try {
+    for (const idAprobador of aprobadores) {
+      const existe = await ejecutarConsulta(
+        `
+        SELECT ESTADO FROM Aprobaciones_Informe
+        WHERE ID_INFORME = @idInforme AND ID_APROBADOR = @idAprobador
+        `,
+        {
+          idInforme: { type: sql.Int, value: idInforme },
+          idAprobador: { type: sql.Int, value: idAprobador },
+        }
+      );
+
+      if (existe.length > 0) {
+        const estadoActual = existe[0].ESTADO;
+
+        if (estadoActual === "Rechazado") {
+          // Actualizar estado a Pendiente
+          await ejecutarConsulta(
+            `
+            UPDATE Aprobaciones_Informe
+            SET ESTADO = 'Pendiente', FECHA_SOLICITUD = GETDATE(), FECHA_RESPUESTA = NULL, COMENTARIO = NULL
+            WHERE ID_INFORME = @idInforme AND ID_APROBADOR = @idAprobador
+            `,
+            {
+              idInforme: { type: sql.Int, value: idInforme },
+              idAprobador: { type: sql.Int, value: idAprobador },
+            }
+          );
+        } else {
+          const nombre = await obtenerNombreAprobador(idAprobador);
+          return res.status(400).json({
+            success: false,
+            message: `El informe técnico ya fue enviado al aprobador ${nombre}`,
+          });
+        }
+      } else {
+        // Insertar nueva aprobación
+        await ejecutarConsulta(
+          `
+          INSERT INTO Aprobaciones_Informe (ID_INFORME, ID_APROBADOR, ESTADO, ID_TECNICO)
+          VALUES (@idInforme, @idAprobador, 'Pendiente', @idTecnico)
+          `,
+          {
+            idInforme: { type: sql.Int, value: idInforme },
+            idAprobador: { type: sql.Int, value: idAprobador },
+            idTecnico: { type: sql.Int, value: idTecnico },
+          }
+        );
+      }
+    }
+
+    const nombreArchivo = await obtenerNombreArchivo(idInforme);
+    const nombreTecnico = await obtenerNombreTecnico(idInforme);
+    await notificarTeams(nombreArchivo, nombreTecnico);
+
+    res.json({ success: true, message: "Informe enviado para aprobación." });
+  } catch (error) {
+    console.error("Error al enviar informe para aprobación:", error);
+    res.status(500).json({ error: "Error al enviar informe para aprobación." });
+  }
 };
+
 exports.aprobarInforme = async (req, res) => {
   const { idInforme, idAprobador, comentario } = req.body;
 
@@ -433,3 +533,103 @@ async function notificarAprobacionTeams(
   );
 };
  */
+
+exports.rechazarInforme = async (req, res) => {
+  const { idInforme, idAprobador, comentario } = req.body;
+  if (!idInforme || !idAprobador) {
+    return res.status(400).json({ error: "Datos incompletos" });
+  }
+
+  try {
+    const query = `
+      UPDATE Aprobaciones_Informe
+      SET ESTADO = 'Rechazado', FECHA_RESPUESTA = GETDATE(), COMENTARIO = @comentario
+      WHERE ID_INFORME = @idInforme AND ID_APROBADOR = @idAprobador
+    `;
+    await ejecutarConsulta(query, {
+      idInforme: { type: sql.Int, value: idInforme },
+      idAprobador: { type: sql.Int, value: idAprobador },
+      comentario: { type: sql.NVarChar, value: comentario || "" },
+    });
+    const datos = await ejecutarConsulta(
+      `
+       SELECT NOMBRE AS nombreArchivo, TECNICO AS nombreTecnico
+      FROM Informes_PDF WHERE ID = @idInforme
+    `,
+      {
+        idInforme: { type: sql.Int, value: idInforme },
+      }
+    );
+    const { nombreArchivo, nombreTecnico } = datos[0] || {};
+
+    if (nombreArchivo && nombreTecnico) {
+      await notificarRechazoTeams(nombreArchivo, nombreTecnico, comentario);
+    }
+    res.json({ success: true, message: "Informe rechazado correctamente" });
+  } catch (error) {
+    console.error("Error al rechazar informe:", error);
+    res.status(500).json({ error: "Error al rechazar informe" });
+  }
+};
+async function notificarRechazoTeams(nombreArchivo, nombreTecnico, comentario) {
+  // Similar estructura a notificarAprobacionTeams pero con texto e íconos de rechazo ❌
+  const webhookUrl =
+    "https://bgrecuador.webhook.office.com/webhookb2/830e2adb-66a8-4466-936f-b86871ff7dac@5403bb85-6bc3-495d-8a5e-1a61c622dd74/IncomingWebhook/b209c58352684e0583d2ae8990918f89/b861c152-81d8-4d1e-acfc-70b5b7cd0936/V2oHtuzv3ytpLcmuBnlcgnkV2zV6yO08ElBfpsa0bFLZk1";
+
+  const fecha = new Date().toLocaleString("es-EC", {
+    timeZone: "America/Guayaquil",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const tarjeta = {
+    type: "message",
+    attachments: [
+      {
+        contentType: "application/vnd.microsoft.card.adaptive",
+        content: {
+          $schema: "http://adaptivecards.io/schemas/adaptive-card.json",
+          type: "AdaptiveCard",
+          version: "1.4",
+          body: [
+            {
+              type: "TextBlock",
+              text: "❌ Informe técnico rechazado",
+              weight: "Bolder",
+              size: "Medium",
+              color: "Attention",
+            },
+            {
+              type: "FactSet",
+              facts: [
+                { title: "Archivo:", value: nombreArchivo },
+                { title: "Técnico:", value: nombreTecnico },
+                { title: "Fecha:", value: fecha },
+                {
+                  title: "Comentario:",
+                  value: comentario || "Sin comentarios",
+                },
+              ],
+            },
+          ],
+          actions: [
+            {
+              type: "Action.OpenUrl",
+              title: "🔗 Ver informe rechazado",
+              url: "http://172.20.70.113:3001/#/mis-informes",
+            },
+          ],
+        },
+      },
+    ],
+  };
+
+  try {
+    await axios.post(webhookUrl, tarjeta);
+  } catch (error) {
+    console.error("Error al enviar tarjeta de aprobación a Teams:", error);
+  }
+}

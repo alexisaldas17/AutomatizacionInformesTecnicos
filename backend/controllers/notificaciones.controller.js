@@ -1,8 +1,41 @@
-/* 
+
 const axios = require('axios');
 const sql = require('mssql');
 const bcrypt = require('bcrypt');
+const axios = require('axios');
 
+
+// Reemplaza esta URL con la del flujo de Power Automate
+const powerAutomateUrl = 'https://prod-xx.westus.logic.azure.com:...';
+
+exports.notificarTeams = async (req, res) => {
+  try {
+    // Datos de prueba para enviar al flujo
+    const payload = {
+      equipo: 'SRV-QT-01',
+      estado: 'En mantenimiento',
+      tecnico: 'Bryan Aldas',
+      mensaje: 'Se realizó limpieza interna y cambio de pasta térmica.',
+      fecha: new Date().toISOString()
+    };
+
+    // Enviar POST al flujo de Power Automate
+    const response = await axios.post(powerAutomateUrl, payload, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    res.status(response.status).send(response.data);
+  } catch (error) {
+    console.error('Error al enviar al flujo:', error.message);
+    res.status(500).send('Error al enviar al flujo de Power Automate');
+  }
+};
+
+
+
+/* 
 // Configuración de credenciales de Microsoft Graph
 const tenantId = '5403bb85-6bc3-495d-8a5e-1a61c622dd74';
 const clientId = 'e0582bd1-a7b0-498e-a476-f6a24ad817a1';

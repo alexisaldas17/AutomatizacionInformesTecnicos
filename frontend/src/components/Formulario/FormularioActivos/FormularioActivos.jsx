@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "styled-components";
 import { lightTheme, darkTheme } from "../../themes";
 import { usePrefersDarkMode } from "../../../hooks/usePrefersDarkMode";
+import CreatableSelect from "react-select/creatable";
+
 import {
   Dialog,
   DialogTitle,
@@ -90,7 +92,8 @@ const FormularioActivos = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [openModalAprobadores, setOpenModalAprobadores] = useState(false);
-
+  const [modoManualEquipo, setModoManualEquipo] = useState(false);
+  const [modoManualUsuario, setModoManualUsuario] = useState(false);
   const navigate = useNavigate();
 
   const handleDelete = () => {
@@ -104,9 +107,8 @@ const FormularioActivos = () => {
   const formRef = useRef(null);
   const [mostrarModalPDF, setMostrarModalPDF] = useState(false);
   const [pdfURL, setPdfURL] = useState(null);
-  const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
-  const [pdfBlobGenerado, setPdfBlobGenerado] = useState(null);
   const [nombreArchivoGenerado, setNombreArchivoGenerado] = useState("");
+  const [datosEquipo, setDatosEquipo] = useState(null);
 
   const [tecnicos, setTecnicos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
@@ -185,7 +187,6 @@ const FormularioActivos = () => {
     firma: firmaBase64,
   });
 
-  const [datosEquipo, setDatosEquipo] = useState(null);
   useEffect(() => {
     const handlePaste = (event) => {
       const items = event.clipboardData?.items;
@@ -426,17 +427,33 @@ const FormularioActivos = () => {
 
   const handleUsuarioSeleccionado = async (opcion) => {
     try {
+      console.log("Opción seleccionada:", opcion);
       const usuarioCompleto = await obtenerUsuarioPorNombre(opcion.label);
+      console.log("usuarioCompleto", usuarioCompleto);
+      if (!usuarioCompleto || !usuarioCompleto.MAIL) {
+        toast.info(
+          "Usuario no encontrado. Puedes ingresar los datos manualmente."
+        );
+        setModoManualUsuario(true);
+        setFormData((prev) => ({ ...prev, usuario: opcion.label }));
+        return;
+      }
+
+      setModoManualUsuario(false);
       setFormData((prev) => ({
         ...prev,
         usuario: opcion.label,
-        email: usuarioCompleto.MAIL || "",
-        cargo: usuarioCompleto.CARGO || "",
-        empresa: usuarioCompleto.EMPRESA || "",
-        departamento: usuarioCompleto.DEPARTAMENTO || "",
+        email: usuarioCompleto.MAIL ?? "",
+        cargo: usuarioCompleto.CARGO ?? "",
+        empresa: usuarioCompleto.EMPRESA ?? "",
+        departamento: usuarioCompleto.DEPARTAMENTO ?? "",
       }));
     } catch (error) {
       console.error("Error al obtener datos del usuario:", error);
+      toast.info(
+        "Usuario no encontrado. Puedes ingresar los datos manualmente."
+      );
+      setModoManualUsuario(true);
     }
   };
 
@@ -553,26 +570,44 @@ const FormularioActivos = () => {
   const handleEquipoSeleccionado = async (opcion) => {
     try {
       const equipoCompleto = await obtenerEquipoPorNombre(opcion.label);
+
+      if (!equipoCompleto || !equipoCompleto.MODELO) {
+        toast.info(
+          "Equipo no encontrado. Puedes ingresar los datos manualmente."
+        );
+        setModoManualEquipo(true);
+        setFormData((prev) => ({
+          ...prev,
+          equipo: opcion.label,
+        }));
+        return;
+      }
+
+      setModoManualEquipo(false); // Desactiva modo manual si se encuentra el equipo
       setFormData((prev) => ({
         ...prev,
         equipo: opcion.label,
-        modelo: equipoCompleto.MODELO || "",
-        marca: equipoCompleto.FABRICANTE || "",
-        agencia: equipoCompleto.AGENCIA || "",
-        ipEquipo: equipoCompleto.DIRECCION_IP || "",
-        numSerie: equipoCompleto.NUM_SERIE || "",
-        direccionMAC: equipoCompleto.DIRECCION_MAC || "",
-        codigoBarras: equipoCompleto.CODIGO || "",
-        discoDuro: equipoCompleto.CAPACIDAD_DISCO || "",
-        espacioLibre: equipoCompleto.ESPACIO_LIBRE_DISCO || "",
-        memoriaRAM: equipoCompleto.MEMORIA_FISICA || "",
-        procesador: equipoCompleto.PROCESADOR || "",
-        velocidad: equipoCompleto.VELOCIDAD_PROCESADOR || "",
-        sistemaOperativo: equipoCompleto.SO || "",
-        version_so: equipoCompleto.VERSION_SO || "",
+        modelo: equipoCompleto.MODELO ?? "",
+        marca: equipoCompleto.FABRICANTE ?? "",
+        agencia: equipoCompleto.AGENCIA ?? "",
+        ipEquipo: equipoCompleto.DIRECCION_IP ?? "",
+        numSerie: equipoCompleto.NUM_SERIE ?? "",
+        direccionMAC: equipoCompleto.DIRECCION_MAC ?? "",
+        codigoBarras: equipoCompleto.CODIGO ?? "",
+        discoDuro: equipoCompleto.CAPACIDAD_DISCO ?? "",
+        espacioLibre: equipoCompleto.ESPACIO_LIBRE_DISCO ?? "",
+        memoriaRAM: equipoCompleto.MEMORIA_FISICA ?? "",
+        procesador: equipoCompleto.PROCESADOR ?? "",
+        velocidad: equipoCompleto.VELOCIDAD_PROCESADOR ?? "",
+        sistemaOperativo: equipoCompleto.SO ?? "",
+        version_so: equipoCompleto.VERSION_SO ?? "",
       }));
     } catch (error) {
-      console.error("Error al obtener datos del usuario:", error);
+      console.info("Equipo no encontrado:", error);
+      toast.info(
+        "Equipo no encontrado. Puedes ingresar los datos manualmente."
+      );
+      setModoManualEquipo(true);
     }
   };
 
@@ -744,15 +779,48 @@ const FormularioActivos = () => {
             <FilaFormulario>
               <div>
                 <label htmlFor="usuario">Nombre del Usuario</label>
-                <Select
+                <CreatableSelect
                   id="usuario"
                   options={opcionesUsuarios}
-                  onChange={handleUsuarioSeleccionado}
-                  value={opcionesUsuarios.find(
-                    (opt) => opt.label === formData.usuario
-                  )}
-                  placeholder="Selecciona un usuario"
+                  onChange={(opcion, { action }) => {
+                    if (action === "create-option") {
+                      // Activar modo manual y establecer el nombre ingresado
+                      setModoManualUsuario(true);
+                      setFormData((prev) => ({
+                        ...prev,
+                        usuario: opcion.label,
+                        email: "",
+                        cargo: "",
+                        empresa: "",
+                        departamento: "",
+                      }));
+                    } else if (action === "clear") {
+                      // Si se borra el campo
+                      setModoManualUsuario(true);
+                      setFormData((prev) => ({
+                        ...prev,
+                        usuario: "",
+                        email: "",
+                        cargo: "",
+                        empresa: "",
+                        departamento: "",
+                      }));
+                    } else {
+                      // Si se selecciona una opción existente
+                      handleUsuarioSeleccionado(opcion);
+                    }
+                  }}
+                  value={
+                    opcionesUsuarios.find(
+                      (opt) => opt.label === formData.usuario
+                    ) || {
+                      label: formData.usuario,
+                      value: null,
+                    }
+                  }
+                  placeholder="Selecciona o escribe el nombre del usuario"
                   styles={customSelectStyles(isDarkMode)}
+                  isClearable
                 />
               </div>
               <div>
@@ -805,15 +873,48 @@ const FormularioActivos = () => {
             <FilaFormulario>
               <div>
                 <label htmlFor="equipo">EQUIPO</label>
-                <Select
+                <CreatableSelect
                   id="equipo"
                   options={opcionesEquipos}
-                  onChange={handleEquipoSeleccionado}
-                  value={opcionesEquipos.find(
-                    (opt) => opt.label === formData.equipo
-                  )}
-                  placeholder="Selecciona equipo"
+                  onChange={(opcion) => {
+                    if (!opcion) {
+                      // Si se borra el campo, limpiar el estado y activar modo manual
+                      setFormData((prev) => ({
+                        ...prev,
+                        equipo: "",
+                        modelo: "",
+                        marca: "",
+                        agencia: "",
+                        ipEquipo: "",
+                        numSerie: "",
+                        direccionMAC: "",
+                        codigoBarras: "",
+                        discoDuro: "",
+                        espacioLibre: "",
+                        memoriaRAM: "",
+                        procesador: "",
+                        velocidad: "",
+                        sistemaOperativo: "",
+                        version_so: "",
+                      }));
+                      setModoManualEquipo(true);
+                      return;
+                    }
+
+                    setFormData((prev) => ({
+                      ...prev,
+                      equipo: opcion.label,
+                    }));
+                    handleEquipoSeleccionado(opcion);
+                  }}
+                  value={
+                    opcionesEquipos.find(
+                      (opt) => opt.label === formData.equipo
+                    ) || { label: formData.equipo, value: null }
+                  }
+                  placeholder="Selecciona o escribe el nombre del equipo"
                   styles={customSelectStyles(isDarkMode)}
+                  isClearable
                 />
               </div>
 
@@ -829,6 +930,7 @@ const FormularioActivos = () => {
                   name="modelo"
                   value={formData.modelo}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -838,6 +940,7 @@ const FormularioActivos = () => {
                   name="marca"
                   value={formData.marca}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
 
@@ -868,6 +971,7 @@ const FormularioActivos = () => {
                   name="numSerie"
                   value={formData.numSerie}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -877,6 +981,7 @@ const FormularioActivos = () => {
                   name="direccionMAC"
                   value={formData.direccionMAC}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -911,6 +1016,7 @@ const FormularioActivos = () => {
                   name="discoDuro"
                   value={formData.discoDuro}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -920,6 +1026,7 @@ const FormularioActivos = () => {
                   name="espacioLibre"
                   value={formData.espacioLibre}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -929,6 +1036,7 @@ const FormularioActivos = () => {
                   name="memoriaRAM"
                   value={formData.memoriaRAM}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -938,6 +1046,7 @@ const FormularioActivos = () => {
                   name="procesador"
                   value={formData.procesador}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
             </FilaFormulario>
@@ -949,6 +1058,7 @@ const FormularioActivos = () => {
                   name="velocidad"
                   value={formData.velocidad}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -958,6 +1068,7 @@ const FormularioActivos = () => {
                   name="sistemaOperativo"
                   value={formData.sistemaOperativo}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
               <div>
@@ -967,6 +1078,7 @@ const FormularioActivos = () => {
                   name="version_so"
                   value={formData.version_so}
                   onChange={handleChange}
+                  readOnly={!modoManualEquipo}
                 />
               </div>
             </FilaFormulario>
