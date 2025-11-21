@@ -40,8 +40,8 @@ app.use('/api/authRecovery', authRecoveryRoutes);
 app.use('/api/componentes', componentesRoutes);
 
 // Iniciar servidor
-app.listen(PORT, '172.20.70.113', () => {
-  console.log(`Servidor escuchando en http://172.20.70.113:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor escuchando en http://0.0.0.0:${PORT}`);
 });
 
 app.get('/', (req, res) => {

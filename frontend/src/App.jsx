@@ -7,7 +7,7 @@ import React from "react";
   Navigate,
 } from "react-router-dom";
 
-import Home from "./components/home/Home";
+import Home from "./components/Home/Home";
 import HistorialInformes from "./components/Informes/Historial/HistorialInformesActivos";
 import FormularioComponentes from "./components/Formulario/FormularioComponentes/FormularioComponentes";
 import FormularioActivos from "./components/Formulario/FormularioActivos/FormularioActivos";

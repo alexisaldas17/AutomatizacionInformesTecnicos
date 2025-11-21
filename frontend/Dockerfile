@@ -1,21 +1,18 @@
-# Etapa 1: Construcción de la app con Node.js
-FROM node:18 AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
+
+# Copia solo package.json primero para aprovechar cache
 COPY package*.json ./
 RUN npm install
+
+# Copia el resto del código
 COPY . .
+
+# Genera el build
 RUN npm run build
 
-# Etapa 2: Servir con Nginx
-FROM nginx:stable-alpine
-
-# Copiar configuración personalizada de Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copiar archivos de build al directorio de Nginx
-COPY --from=build /app/build /usr/share/nginx/html
-
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
